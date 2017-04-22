@@ -35,6 +35,7 @@ public class ZwhAggregateWorker
     Map<String, Set<String>> mapCorpActive = new HashMap<>();
     Map<String, Long> mapCorpNumActive = new HashMap<>();
     Map<String, Double> mapCorpNetIsk = new HashMap<>();
+    Map<String, Long> mapCorpSumOnKills = new HashMap<>();
 
     List<ZwhAggregateJPA> aggregates = zwhAggregateRepository.findBetweenDates(month * 100, month * 100 + 99);
 
@@ -50,6 +51,7 @@ public class ZwhAggregateWorker
         //mapCorpActive.put(corporation, active);
         mapCorpNumActive.put(corporation, (long) active.size());
         mapCorpNetIsk.put(corporation, mapCorpNetIsk.get(corporation) + aggregate.getNetisk());
+        mapCorpSumOnKills.put(corporation, mapCorpSumOnKills.get(corporation) + aggregate.getSumonkills());
       }
       else
       {
@@ -58,13 +60,15 @@ public class ZwhAggregateWorker
         mapCorpActive.put(corporation, new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
         mapCorpNumActive.put(corporation, aggregate.getNumactive());
         mapCorpNetIsk.put(corporation, aggregate.getNetisk());
+        mapCorpSumOnKills.put(corporation, aggregate.getSumonkills());
       }
     }
 
     for(String corporation : mapCorpKills.keySet())
     {
       result.add(new ZwhAggregateBean(month, corporation, mapCorpKills.get(corporation), mapCorpIsk.get(corporation),
-                                      Joiner.on(",").join(mapCorpActive.get(corporation)), mapCorpNumActive.get(corporation), mapCorpNetIsk.get(corporation)));
+                                      Joiner.on(",").join(mapCorpActive.get(corporation)), mapCorpNumActive.get(corporation), mapCorpNetIsk.get(corporation),
+                                      mapCorpSumOnKills.get(corporation)));
     }
 
     return result;

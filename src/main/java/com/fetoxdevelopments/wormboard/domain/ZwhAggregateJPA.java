@@ -40,6 +40,10 @@ public class ZwhAggregateJPA
   @Column(name = "\"netisk\"")
   private double netisk;
 
+  @Basic
+  @Column(name = "\"sumonkills\"")
+  private long sumonkills;
+
   public long getDate()
   {
     return date;
@@ -108,5 +112,15 @@ public class ZwhAggregateJPA
   public void setNetisk(double netisk)
   {
     this.netisk = netisk;
+  }
+
+  public long getSumonkills()
+  {
+    return sumonkills;
+  }
+
+  public void setSumonkills(long sumonkills)
+  {
+    this.sumonkills = sumonkills;
   }
 }

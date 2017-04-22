@@ -18,7 +18,9 @@ public class ZwhAggregateBean
 
   private double netisk;
 
-  public ZwhAggregateBean(long date, String corporation, long kills, double isk, String active, long numactive, double netisk)
+  private long sumonkills;
+
+  public ZwhAggregateBean(long date, String corporation, long kills, double isk, String active, long numactive, double netisk, long sumonkills)
   {
     this.date = date;
     this.corporation = corporation;
@@ -27,6 +29,7 @@ public class ZwhAggregateBean
     this.active = active;
     this.numactive = numactive;
     this.netisk = netisk;
+    this.sumonkills = sumonkills;
   }
 
   public ZwhAggregateBean(ZwhAggregateJPA zwhAggregateJPA)
@@ -38,6 +41,7 @@ public class ZwhAggregateBean
     this.active = zwhAggregateJPA.getActive();
     this.numactive = zwhAggregateJPA.getNumactive();
     this.netisk = zwhAggregateJPA.getNetisk();
+    this.sumonkills = zwhAggregateJPA.getSumonkills();
   }
 
   public long getDate()
@@ -108,5 +112,15 @@ public class ZwhAggregateBean
   public void setNetisk(double netisk)
   {
     this.netisk = netisk;
+  }
+
+  public long getSumonkills()
+  {
+    return sumonkills;
+  }
+
+  public void setSumonkills(long sumonkills)
+  {
+    this.sumonkills = sumonkills;
   }
 }

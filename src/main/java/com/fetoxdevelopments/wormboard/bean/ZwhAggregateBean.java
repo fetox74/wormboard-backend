@@ -4,54 +4,39 @@ import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
 
 public class ZwhAggregateBean
 {
-  private long date;
-
   private String corporation;
 
   private long kills;
 
   private double isk;
 
-  private String active;
+  private double netisk;
 
   private long numactive;
 
-  private double netisk;
+  private double avgperkill;
 
-  private long sumonkills;
+  private double iskperactive;
 
-  public ZwhAggregateBean(long date, String corporation, long kills, double isk, String active, long numactive, double netisk, long sumonkills)
+  private double netiskperactive;
+
+  private double iskperavgonkill;
+
+  private double netiskperavgonkill;
+
+  public ZwhAggregateBean(String corporation, long kills, double isk, double netisk, long numactive, double avgperkill, double iskperactive,
+                          double netiskperactive, double iskperavgonkill, double netiskperavgonkill)
   {
-    this.date = date;
     this.corporation = corporation;
     this.kills = kills;
     this.isk = isk;
-    this.active = active;
-    this.numactive = numactive;
     this.netisk = netisk;
-    this.sumonkills = sumonkills;
-  }
-
-  public ZwhAggregateBean(ZwhAggregateJPA zwhAggregateJPA)
-  {
-    this.date = zwhAggregateJPA.getDate();
-    this.corporation = zwhAggregateJPA.getCorporation();
-    this.kills = zwhAggregateJPA.getKills();
-    this.isk = zwhAggregateJPA.getIsk();
-    this.active = zwhAggregateJPA.getActive();
-    this.numactive = zwhAggregateJPA.getNumactive();
-    this.netisk = zwhAggregateJPA.getNetisk();
-    this.sumonkills = zwhAggregateJPA.getSumonkills();
-  }
-
-  public long getDate()
-  {
-    return date;
-  }
-
-  public void setDate(long date)
-  {
-    this.date = date;
+    this.numactive = numactive;
+    this.avgperkill = avgperkill;
+    this.iskperactive = iskperactive;
+    this.netiskperactive = netiskperactive;
+    this.iskperavgonkill = iskperavgonkill;
+    this.netiskperavgonkill = netiskperavgonkill;
   }
 
   public String getCorporation()
@@ -84,14 +69,14 @@ public class ZwhAggregateBean
     this.isk = isk;
   }
 
-  public String getActive()
+  public double getNetisk()
   {
-    return active;
+    return netisk;
   }
 
-  public void setActive(String active)
+  public void setNetisk(double netisk)
   {
-    this.active = active;
+    this.netisk = netisk;
   }
 
   public long getNumactive()
@@ -104,23 +89,53 @@ public class ZwhAggregateBean
     this.numactive = numactive;
   }
 
-  public double getNetisk()
+  public double getAvgperkill()
   {
-    return netisk;
+    return avgperkill;
   }
 
-  public void setNetisk(double netisk)
+  public void setAvgperkill(double avgperkill)
   {
-    this.netisk = netisk;
+    this.avgperkill = avgperkill;
   }
 
-  public long getSumonkills()
+  public double getIskperactive()
   {
-    return sumonkills;
+    return iskperactive;
   }
 
-  public void setSumonkills(long sumonkills)
+  public void setIskperactive(double iskperactive)
   {
-    this.sumonkills = sumonkills;
+    this.iskperactive = iskperactive;
+  }
+
+  public double getNetiskperactive()
+  {
+    return netiskperactive;
+  }
+
+  public void setNetiskperactive(double netiskperactive)
+  {
+    this.netiskperactive = netiskperactive;
+  }
+
+  public double getIskperavgonkill()
+  {
+    return iskperavgonkill;
+  }
+
+  public void setIskperavgonkill(double iskperavgonkill)
+  {
+    this.iskperavgonkill = iskperavgonkill;
+  }
+
+  public double getNetiskperavgonkill()
+  {
+    return netiskperavgonkill;
+  }
+
+  public void setNetiskperavgonkill(double netiskperavgonkill)
+  {
+    this.netiskperavgonkill = netiskperavgonkill;
   }
 }

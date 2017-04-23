@@ -11,13 +11,17 @@ import java.util.Set;
 import com.fetoxdevelopments.wormboard.bean.ZwhAggregateBean;
 import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
 import com.fetoxdevelopments.wormboard.repository.ZwhAggregateRepository;
-import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ZwhAggregateWorker
 {
+  private static final Logger LOG = LogManager.getLogger(ZwhAggregateWorker.class);
+
   @Autowired
   private ZwhAggregateRepository zwhAggregateRepository;
 
@@ -37,8 +41,11 @@ public class ZwhAggregateWorker
     Map<String, Double> mapCorpNetIsk = new HashMap<>();
     Map<String, Long> mapCorpSumOnKills = new HashMap<>();
 
+    Stopwatch dbStopwatch = Stopwatch.createStarted();
     List<ZwhAggregateJPA> aggregates = zwhAggregateRepository.findBetweenDates(month * 100, month * 100 + 99);
+    LOG.info("DB access in " + dbStopwatch.toString());
 
+    Stopwatch aggStopwatch = Stopwatch.createStarted();
     for(ZwhAggregateJPA aggregate : aggregates)
     {
       String corporation = aggregate.getCorporation();
@@ -66,10 +73,19 @@ public class ZwhAggregateWorker
 
     for(String corporation : mapCorpKills.keySet())
     {
-      result.add(new ZwhAggregateBean(month, corporation, mapCorpKills.get(corporation), mapCorpIsk.get(corporation),
-                                      Joiner.on(",").join(mapCorpActive.get(corporation)), mapCorpNumActive.get(corporation), mapCorpNetIsk.get(corporation),
-                                      mapCorpSumOnKills.get(corporation)));
+      long numactive = mapCorpNumActive.get(corporation);
+      long kills = mapCorpKills.get(corporation);
+      double avgperkill = (double) mapCorpSumOnKills.get(corporation) / kills;
+
+      if(numactive > 0 && avgperkill > 0.0 && !corporation.equals("Vigilant Tyrannos"))
+      {
+        double isk = mapCorpIsk.get(corporation);
+        double netisk = mapCorpNetIsk.get(corporation);
+        result.add(new ZwhAggregateBean(corporation, kills, isk, netisk, numactive, avgperkill,isk / (double) numactive,
+                                        netisk / (double) numactive, isk / avgperkill, netisk / avgperkill));
+      }
     }
+    LOG.info("Aggregated in " + aggStopwatch.toString());
 
     return result;
   }

@@ -30,7 +30,7 @@ public class ZwhAggregateWorker
     return zwhAggregateRepository.findByDate(date);
   }
 
-  public List<ZwhAggregateBean> getStatsForMonth(Long month)
+  public List<ZwhAggregateBean> getStatsForTimespan(Long dateBegin, Long dateEnd)
   {
     List<ZwhAggregateBean> result = new ArrayList<>();
 
@@ -42,7 +42,7 @@ public class ZwhAggregateWorker
     Map<String, Long> mapCorpSumOnKills = new HashMap<>();
 
     Stopwatch dbStopwatch = Stopwatch.createStarted();
-    List<ZwhAggregateJPA> aggregates = zwhAggregateRepository.findBetweenDates(month * 100, month * 100 + 99);
+    List<ZwhAggregateJPA> aggregates = zwhAggregateRepository.findBetweenDates(dateBegin, dateEnd);
     LOG.info("DB access in " + dbStopwatch.toString());
 
     Stopwatch aggStopwatch = Stopwatch.createStarted();

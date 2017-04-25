@@ -90,6 +90,7 @@ public class ZwhAggregateWorker
                                         netisk / (double) numactive, isk / avgperkill, netisk / avgperkill));
       }
     }
+    aggStopwatch.stop();
     LOG.info("Aggregated in " + aggStopwatch.toString());
 
     return result;

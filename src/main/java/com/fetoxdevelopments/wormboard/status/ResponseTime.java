@@ -1,5 +1,8 @@
 package com.fetoxdevelopments.wormboard.status;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class ResponseTime
 {
   private long numRequests = 0;

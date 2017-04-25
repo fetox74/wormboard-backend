@@ -7,10 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.fetoxdevelopments.wormboard.bean.ZwhAggregateBean;
 import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
 import com.fetoxdevelopments.wormboard.repository.ZwhAggregateRepository;
+import com.fetoxdevelopments.wormboard.status.ResponseTime;
 import com.google.common.base.Stopwatch;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -24,6 +26,9 @@ public class ZwhAggregateWorker
 
   @Autowired
   private ZwhAggregateRepository zwhAggregateRepository;
+
+  @Autowired
+  private ResponseTime responseTime;
 
   public List<ZwhAggregateJPA> getRawStatsForDay(Long date)
   {
@@ -48,6 +53,7 @@ public class ZwhAggregateWorker
 
     Stopwatch dbStopwatch = Stopwatch.createStarted();
     List<ZwhAggregateJPA> aggregates = zwhAggregateRepository.findBetweenDates(dateBegin, dateEnd);
+    dbStopwatch.stop();
     LOG.info("DB access in " + dbStopwatch.toString());
 
     Stopwatch aggStopwatch = Stopwatch.createStarted();
@@ -92,6 +98,8 @@ public class ZwhAggregateWorker
     }
     aggStopwatch.stop();
     LOG.info("Aggregated in " + aggStopwatch.toString());
+
+    responseTime.addNewRequest((double)dbStopwatch.elapsed(TimeUnit.MILLISECONDS), (double)aggStopwatch.elapsed(TimeUnit.MILLISECONDS));
 
     return result;
   }

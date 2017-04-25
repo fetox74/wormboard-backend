@@ -14,7 +14,8 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 @Configuration
 @EnableJpaRepositories("com.fetoxdevelopments.wormboard.repository")
-@ComponentScan({"com.fetoxdevelopments.wormboard.app", "com.fetoxdevelopments.wormboard.controller", "com.fetoxdevelopments.wormboard.worker"})
+@ComponentScan({"com.fetoxdevelopments.wormboard.app", "com.fetoxdevelopments.wormboard.controller", "com.fetoxdevelopments.wormboard.worker",
+                "com.fetoxdevelopments.wormboard.status"})
 public class DatabaseConfig
 {
   @Bean

@@ -8,7 +8,9 @@ import java.util.Set;
 import com.fetoxdevelopments.wormboard.bean.ServerStatusBean;
 import com.fetoxdevelopments.wormboard.bean.ZwhAggregateBean;
 import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
+import com.fetoxdevelopments.wormboard.status.ResponseTime;
 import com.fetoxdevelopments.wormboard.worker.ZwhAggregateWorker;
+import com.google.common.base.Joiner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +22,9 @@ public class StatisticAggregatesController
   @Autowired
   private ZwhAggregateWorker zwhAggregateWorker;
 
+  @Autowired
+  private ResponseTime responseTime;
+
   @RequestMapping("/getRawStatsForDay")
   public List<ZwhAggregateJPA> getRawStatsForDay(@RequestParam(value = "date", defaultValue = "") Long date)
   {
@@ -29,6 +34,7 @@ public class StatisticAggregatesController
   @RequestMapping("/getServerStatus")
   public ServerStatusBean getServerStatus()
   {
+    String statusMsg;
     Set<String> allMonth = new LinkedHashSet<>();
     List<Long> allDates = zwhAggregateWorker.getAllDates();
 
@@ -42,7 +48,11 @@ public class StatisticAggregatesController
       // todo: find missing days
     }
 
-    return new ServerStatusBean(new ArrayList<>(allMonth), "killmails processed until 2017-04-21, 0 days missing, &oslash;db: 182.2 ms, &oslash;agg: 35.35 ms");
+    latestProcessedDate = Joiner.on("-").join(latestProcessedDate.substring(0, 4), latestProcessedDate.substring(4, 6), latestProcessedDate.substring(6, 8));
+    statusMsg = "data until " + latestProcessedDate + ", 0 days missing, &oslash;db: " + String.format("%.2f", responseTime.getDbMillis()) +
+                " ms, &oslash;agg: " + String.format("%.2f", responseTime.getAggMillis()) + " ms";
+
+    return new ServerStatusBean(new ArrayList<>(allMonth), statusMsg);
   }
 
   @RequestMapping("/getStatsForMonth")

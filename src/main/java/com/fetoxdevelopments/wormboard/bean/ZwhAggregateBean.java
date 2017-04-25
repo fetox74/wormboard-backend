@@ -1,7 +1,5 @@
 package com.fetoxdevelopments.wormboard.bean;
 
-import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
-
 public class ZwhAggregateBean
 {
   private String corporation;

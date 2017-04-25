@@ -30,6 +30,11 @@ public class ZwhAggregateWorker
     return zwhAggregateRepository.findByDate(date);
   }
 
+  public List<Long> getAllDates()
+  {
+    return zwhAggregateRepository.findAllDates();
+  }
+
   public List<ZwhAggregateBean> getStatsForTimespan(Long dateBegin, Long dateEnd)
   {
     List<ZwhAggregateBean> result = new ArrayList<>();

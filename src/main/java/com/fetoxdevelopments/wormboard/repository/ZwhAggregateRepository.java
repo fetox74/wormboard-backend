@@ -15,6 +15,11 @@ public interface ZwhAggregateRepository
          + " WHERE date = :date")
   List<ZwhAggregateJPA> findByDate(@Param("date") Long date);
 
+  @Query("SELECT DISTINCT date"
+         + " FROM ZwhAggregateJPA zwhAggregate"
+         + " ORDER BY date ASC")
+  List<Long> findAllDates();
+
   @Query("SELECT zwhAggregate"
          + " FROM ZwhAggregateJPA zwhAggregate"
          + " WHERE date >= :dateBegin AND date <= :dateEnd")

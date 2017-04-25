@@ -1,7 +1,11 @@
 package com.fetoxdevelopments.wormboard.controller;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.fetoxdevelopments.wormboard.bean.ServerStatusBean;
 import com.fetoxdevelopments.wormboard.bean.ZwhAggregateBean;
 import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
 import com.fetoxdevelopments.wormboard.worker.ZwhAggregateWorker;
@@ -20,6 +24,25 @@ public class StatisticAggregatesController
   public List<ZwhAggregateJPA> getRawStatsForDay(@RequestParam(value = "date", defaultValue = "") Long date)
   {
     return zwhAggregateWorker.getRawStatsForDay(date);
+  }
+
+  @RequestMapping("/getServerStatus")
+  public ServerStatusBean getServerStatus()
+  {
+    Set<String> allMonth = new LinkedHashSet<>();
+    List<Long> allDates = zwhAggregateWorker.getAllDates();
+
+    String latestProcessedDate = allDates.get(allDates.size() - 1).toString();
+
+    for(Long date : allDates)
+    {
+      String dateAsString = date.toString();
+      allMonth.add(dateAsString.substring(0, 6));
+
+      // todo: find missing days
+    }
+
+    return new ServerStatusBean(new ArrayList<>(allMonth), "killmails processed until 2017-04-21, 0 days missing, &oslash;db: 182.2 ms, &oslash;agg: 35.35 ms");
   }
 
   @RequestMapping("/getStatsForMonth")

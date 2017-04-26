@@ -49,8 +49,8 @@ public class StatisticAggregatesController
     }
 
     latestProcessedDate = Joiner.on("-").join(latestProcessedDate.substring(0, 4), latestProcessedDate.substring(4, 6), latestProcessedDate.substring(6, 8));
-    statusMsg = "data until " + latestProcessedDate + ", 0 days missing, &oslash;db: " + String.format("%.2f", responseTime.getDbMillis()) +
-                " ms, &oslash;agg: " + String.format("%.2f", responseTime.getAggMillis()) + " ms";
+    statusMsg = "data until " + latestProcessedDate + ", 0 days missing, ødb: " + String.format("%.2f", responseTime.getDbMillis()) +
+                " ms, øagg: " + String.format("%.2f", responseTime.getAggMillis()) + " ms";
 
     return new ServerStatusBean(new ArrayList<>(allMonth), statusMsg);
   }

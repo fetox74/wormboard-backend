@@ -10,7 +10,7 @@ your database.
 
 ## Datagrinding
 
-This script is nowhere finished by now and can only be used manually by putting in a number of dates in the DATES list and then run in Python 2.7
+This script StatsUpdater.py in scripts/python is nowhere near finished by now and can only be used manually by putting in a number of dates in the DATES list and then run in Python 2.7
 
 ## Development environment
 

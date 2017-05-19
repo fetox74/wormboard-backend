@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+import logging
 import re
 import urllib2, gzip, json
 from StringIO import StringIO
 from multiprocessing.pool import ThreadPool
+
+import datetime
 from itertools import islice
 import psycopg2
 
+
+# This script is meant to run as an hourly cron job. It takes the current date and processes all zKillboard killmails until now, after which it does an atomic
+# update of the stats table (delete all todays killmail aggregates and rewrite them)
 
 def partition(data, SIZE=100):
     it = iter(data)
@@ -20,7 +26,7 @@ def getKillmailHashes(date):
     try:
         response = urllib2.urlopen(request)
     except urllib2.HTTPError as err:
-        print err.headers
+        LOG.error(err.headers)
         return []
     if response.info().get("Content-Encoding") == "gzip":
         buf = StringIO(response.read())
@@ -39,7 +45,7 @@ def getCREST(tupleIdHash):
     try:
         response = urllib2.urlopen(request)
     except urllib2.HTTPError as err:
-        print err.headers
+        LOG.error(err.headers)
         return []
     if response.info().get("Content-Encoding") == "gzip":
         buf = StringIO(response.read())
@@ -57,7 +63,7 @@ def getZKB(id):
     try:
         response = urllib2.urlopen(request)
     except urllib2.HTTPError as err:
-        print err.headers
+        LOG.error(err.headers)
         return None
     if response.info().get("Content-Encoding") == "gzip":
         buf = StringIO(response.read())
@@ -115,7 +121,8 @@ def updateMasterDict(killmailCREST, killmailZKB):
         else:
             lossDict[victimCorp] = killmailZKB["zkb"]["totalValue"]
     else:
-        print "kill id " + killmailCREST["killID_str"] + " seems not to exist on zKillboard.."
+        LOG.warning("kill id " + killmailCREST["killID_str"] + " seems not to exist on zKillboard..")
+
 
 def queryAggregateAlreadyInDB(cur, date, corp):
     cur.execute('SELECT * FROM "zwhAggregate" WHERE "date" = ' + date + ' AND "corporation" = ' "'" + corp + "'")
@@ -126,48 +133,52 @@ def queryAggregateAlreadyInDB(cur, date, corp):
 
 
 def updateDB(cur, date):
+    cur.execute('DELETE FROM "zwhAggregate" WHERE "date" = %i' % int(date))
     for key, value in masterDict.items():
         cur.execute('INSERT INTO "zwhAggregate" ("date", "corporation", "kills", "isk", "active", "numactive", "netisk", "sumonkills") VALUES (%i, %s, %i, %f, %s, %i, %f, %i)' % (int(date), "'" + key.replace("'", "''") + "'", value["kills"], value["isk"], "'" + ",".join(map(str, value["active"])) + "'", len(value["active"]), value["isk"] - getIskLossForCorp(key), value["sumonkills"]))
     conn.commit()
 
 
-DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110", "20170111", "20170112", "20170113", "20170114", "20170115", "20170116", "20170117", "20170118", "20170119", "20170120", "20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131"]
+FORMAT = '%(asctime)-15s [%(levelname)-8s] %(message)s'
+logging.basicConfig(format=FORMAT, level=logging.INFO)
+LOG = logging.getLogger(__name__)
+
+today = datetime.date.today().strftime("%Y%m%d")
 reJMail = re.compile("J[0-9]{6}")
 
 try:
     conn = psycopg2.connect("dbname='staticdump' user='postgres' host='localhost' password='bollox'")
 except:
-    print "Unable to connect to the database"
+    LOG.error("Unable to connect to the database")
     exit(-1)
 cur = conn.cursor()
 
-for date in DATES:
-    counter = 0
-    jMailCounter = 0
-    dictKillmailIdHash = getKillmailHashes(date)
-    masterDict = {}
-    lossDict = {}
+counter = 0
+jMailCounter = 0
+dictKillmailIdHash = getKillmailHashes(today)
+masterDict = {}
+lossDict = {}
 
-    print "processing " + date
-    chunks = partition(dictKillmailIdHash)
-    for chunk in chunks:
-        pool = ThreadPool(100)
-        results = pool.map(getCREST, chunk.items())
-        pool.close()
-        pool.join()
+LOG.info("processing " + today)
+chunks = partition(dictKillmailIdHash)
+for chunk in chunks:
+    pool = ThreadPool(100)
+    results = pool.map(getCREST, chunk.items())
+    pool.close()
+    pool.join()
 
-        for killmailCREST in results:
-            if killmailCREST != [] and (reJMail.match(killmailCREST["solarSystem"]["name"]) or killmailCREST["solarSystem"]["name"] == "J1226-0"):
-                updateMasterDict(killmailCREST, getZKB(killmailCREST["killID_str"]))
-                jMailCounter += 1
-            elif not killmailCREST: # 20160824 has the problematic first Keepstar kill that does not appear on CREST, this (and the above killmailCREST != []) is a temporary fix..
-                print("[] error...")
-            counter += 1
+    for killmailCREST in results:
+        if killmailCREST != [] and (reJMail.match(killmailCREST["solarSystem"]["name"]) or killmailCREST["solarSystem"]["name"] == "J1226-0"):
+            updateMasterDict(killmailCREST, getZKB(killmailCREST["killID_str"]))
+            jMailCounter += 1
+        elif not killmailCREST: # 20160824 has the problematic first Keepstar kill that does not appear on CREST, this (and the above killmailCREST != []) is a temporary fix..
+            LOG.error("[] error...")
+        counter += 1
 
-        print "total kills: %i" % counter
-        print "total WH kills: %i" % jMailCounter
+    LOG.info("total kills: %i" % counter)
+    LOG.info("total WH kills: %i" % jMailCounter)
 
-    updateDB(cur, date)
+updateDB(cur, today)
 
 conn.close()
 

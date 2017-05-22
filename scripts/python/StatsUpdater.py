@@ -10,7 +10,7 @@ import psycopg2
 def partition(data, SIZE=100):
     it = iter(data)
     for i in xrange(0, len(data), SIZE):
-        yield {k: data[k] for k in islice(it, SIZE)}
+        yield dict((k, data[k]) for k in islice(it, SIZE))
 
 
 def getKillmailHashes(date):
@@ -131,7 +131,7 @@ def updateDB(cur, date):
     conn.commit()
 
 
-DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110", "20170111", "20170112", "20170113", "20170114", "20170115", "20170116", "20170117", "20170118", "20170119", "20170120", "20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131"]
+DATES = ["20170522"]
 reJMail = re.compile("J[0-9]{6}")
 
 try:

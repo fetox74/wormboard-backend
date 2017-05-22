@@ -16,7 +16,7 @@ import psycopg2
 def partition(data, SIZE=100):
     it = iter(data)
     for i in xrange(0, len(data), SIZE):
-        yield {k: data[k] for k in islice(it, SIZE)}
+        yield dict((k, data[k]) for k in islice(it, SIZE))
 
 
 def getKillmailHashes(date):

@@ -87,7 +87,7 @@ def getFinalHitCorp(attackers):
 
 def getIskLossForCorp(corp):
     if corp in lossDict:
-        return lossDict[corp]["iskLost"]
+        return lossDict[corp]["isklost"]
     else:
         return 0.0
 

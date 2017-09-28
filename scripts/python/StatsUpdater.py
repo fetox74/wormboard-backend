@@ -107,8 +107,17 @@ def getAttackersOfCorp(attackers, corporation):
     return result
 
 
-def getHourOfKill(datetime):
-    return "00"
+def addNumberToHourDict(datetimestring, dict, number):
+    hour = datetimestring[11:13]
+    dict[hour] = dict[hour] + number
+
+
+def getHourDict():
+    result = {}
+    for i in range(24):
+        result[str(i).zfill(2)] = 0
+    return result
+
 
 
 def updateMasterDict(killmailCREST, killmailZKB):
@@ -124,7 +133,9 @@ def updateMasterDict(killmailCREST, killmailZKB):
                 masterDict[finalHitCorp]["sumonkills"] = masterDict[finalHitCorp]["sumonkills"] + len(attackersOfFinalHitCorp)
             else:
                 masterDict[finalHitCorp] = {"kills": 1, "iskwon": killmailZKB["zkb"]["totalValue"], "active": attackersOfFinalHitCorp,
-                                            "sumOnKills": len(attackersOfFinalHitCorp)}
+                                            "sumonkills": len(attackersOfFinalHitCorp), "killsinhour": getHourDict(), "sumonkillsinhour": getHourDict()}
+            addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorp]["killsinhour"], 1)
+            addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorp]["sumonkillsinhour"], len(attackersOfFinalHitCorp))
         if victimCorp in lossDict:
             lossDict[victimCorp]["losses"] = lossDict[victimCorp]["losses"] + 1
             lossDict[victimCorp]["isklost"] = lossDict[victimCorp]["isklost"] + killmailZKB["zkb"]["totalValue"]
@@ -143,6 +154,7 @@ def queryAggregateAlreadyInDB(cur, date, corp):
 
 
 def updateDB(cur, date):
+    cur.execute('DELETE FROM "zwhAggregate" WHERE "date" = %i' % int(date))
     for key, value in masterDict.items():
         cur.execute(
             '''INSERT INTO "zwhAggregate" ("date", "corporation", "kills", "losses", "iskwon", "isklost", "active", "numactive", "sumonkills", 
@@ -160,11 +172,11 @@ def updateDB(cur, date):
             "'" + key.replace("'", "''") + "'",
             value["kills"],
             getLossesForCorp(key),
-            value["iskWon"],
+            value["iskwon"],
             getIskLossForCorp(key),
             "'" + ",".join(map(str, value["active"])) + "'",
             len(value["active"]),
-            value["sumOnKills"],
+            value["sumonkills"],
             value["killsinhour"]["00"],
             value["killsinhour"]["01"],
             value["killsinhour"]["02"],
@@ -216,7 +228,7 @@ def updateDB(cur, date):
     conn.commit()
 
 
-DATES = ["20170522"]
+DATES = ["20170129"]
 reJMail = re.compile("J[0-9]{6}")
 
 try:

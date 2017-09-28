@@ -119,17 +119,17 @@ def updateMasterDict(killmailCREST, killmailZKB):
             attackersOfFinalHitCorp = getAttackersOfCorp(killmailCREST["attackers"], finalHitCorp)
             if finalHitCorp in masterDict:
                 masterDict[finalHitCorp]["kills"] = masterDict[finalHitCorp]["kills"] + 1
-                masterDict[finalHitCorp]["iskWon"] = masterDict[finalHitCorp]["iskWon"] + killmailZKB["zkb"]["totalValue"]
+                masterDict[finalHitCorp]["iskwon"] = masterDict[finalHitCorp]["iskwon"] + killmailZKB["zkb"]["totalValue"]
                 masterDict[finalHitCorp]["active"] = masterDict[finalHitCorp]["active"] | attackersOfFinalHitCorp
-                masterDict[finalHitCorp]["sumOnKills"] = masterDict[finalHitCorp]["sumOnKills"] + len(attackersOfFinalHitCorp)
+                masterDict[finalHitCorp]["sumonkills"] = masterDict[finalHitCorp]["sumonkills"] + len(attackersOfFinalHitCorp)
             else:
-                masterDict[finalHitCorp] = {"kills": 1, "iskWon": killmailZKB["zkb"]["totalValue"], "active": attackersOfFinalHitCorp,
+                masterDict[finalHitCorp] = {"kills": 1, "iskwon": killmailZKB["zkb"]["totalValue"], "active": attackersOfFinalHitCorp,
                                             "sumOnKills": len(attackersOfFinalHitCorp)}
         if victimCorp in lossDict:
             lossDict[victimCorp]["losses"] = lossDict[victimCorp]["losses"] + 1
-            lossDict[victimCorp]["iskLost"] = lossDict[victimCorp]["iskLost"] + killmailZKB["zkb"]["totalValue"]
+            lossDict[victimCorp]["isklost"] = lossDict[victimCorp]["isklost"] + killmailZKB["zkb"]["totalValue"]
         else:
-            lossDict[victimCorp] = {"losses": 1, "iskLost": killmailZKB["zkb"]["totalValue"]}
+            lossDict[victimCorp] = {"losses": 1, "isklost": killmailZKB["zkb"]["totalValue"]}
     else:
         print "kill id " + killmailCREST["killID_str"] + " seems not to exist on zKillboard.."
 
@@ -145,8 +145,17 @@ def queryAggregateAlreadyInDB(cur, date, corp):
 def updateDB(cur, date):
     for key, value in masterDict.items():
         cur.execute(
-            'INSERT INTO "zwhAggregate" ("date", "corporation", "kills", "losses", "iskWon", "iskLost", "active", "numActive", sumOnKills")' +
-            ' VALUES (%i, %s, %i, %i, %f, %f, %s, %i, %i)' % (
+            '''INSERT INTO "zwhAggregate" ("date", "corporation", "kills", "losses", "iskwon", "isklost", "active", "numactive", "sumonkills", 
+            "killsinhour00", "killsinhour01", "killsinhour02", "killsinhour03", "killsinhour04", "killsinhour05", "killsinhour06", "killsinhour07", 
+            "killsinhour08", "killsinhour09", "killsinhour10", "killsinhour11", "killsinhour12", "killsinhour13", "killsinhour14", "killsinhour15", 
+            "killsinhour16", "killsinhour17", "killsinhour18", "killsinhour19", "killsinhour20", "killsinhour21", "killsinhour22", "killsinhour23", 
+            "sumonkillsinhour00", "sumonkillsinhour01", "sumonkillsinhour02", "sumonkillsinhour03", "sumonkillsinhour04", "sumonkillsinhour05", 
+            "sumonkillsinhour06", "sumonkillsinhour07", "sumonkillsinhour08", "sumonkillsinhour09", "sumonkillsinhour10", "sumonkillsinhour11", 
+            "sumonkillsinhour12", "sumonkillsinhour13", "sumonkillsinhour14", "sumonkillsinhour15", "sumonkillsinhour16", "sumonkillsinhour17", 
+            "sumonkillsinhour18", "sumonkillsinhour19", "sumonkillsinhour20", "sumonkillsinhour21", "sumonkillsinhour22", "sumonkillsinhour23") 
+            VALUES (%i, %s, %i, %i, %f, %f, %s, %i, %i, 
+            %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, 
+            %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i)''' % (
             int(date),
             "'" + key.replace("'", "''") + "'",
             value["kills"],
@@ -155,7 +164,55 @@ def updateDB(cur, date):
             getIskLossForCorp(key),
             "'" + ",".join(map(str, value["active"])) + "'",
             len(value["active"]),
-            value["sumOnKills"]))
+            value["sumOnKills"],
+            value["killsinhour"]["00"],
+            value["killsinhour"]["01"],
+            value["killsinhour"]["02"],
+            value["killsinhour"]["03"],
+            value["killsinhour"]["04"],
+            value["killsinhour"]["05"],
+            value["killsinhour"]["06"],
+            value["killsinhour"]["07"],
+            value["killsinhour"]["08"],
+            value["killsinhour"]["09"],
+            value["killsinhour"]["10"],
+            value["killsinhour"]["11"],
+            value["killsinhour"]["12"],
+            value["killsinhour"]["13"],
+            value["killsinhour"]["14"],
+            value["killsinhour"]["15"],
+            value["killsinhour"]["16"],
+            value["killsinhour"]["17"],
+            value["killsinhour"]["18"],
+            value["killsinhour"]["19"],
+            value["killsinhour"]["20"],
+            value["killsinhour"]["21"],
+            value["killsinhour"]["22"],
+            value["killsinhour"]["23"],
+            value["sumonkillsinhour"]["00"],
+            value["sumonkillsinhour"]["01"],
+            value["sumonkillsinhour"]["02"],
+            value["sumonkillsinhour"]["03"],
+            value["sumonkillsinhour"]["04"],
+            value["sumonkillsinhour"]["05"],
+            value["sumonkillsinhour"]["06"],
+            value["sumonkillsinhour"]["07"],
+            value["sumonkillsinhour"]["08"],
+            value["sumonkillsinhour"]["09"],
+            value["sumonkillsinhour"]["10"],
+            value["sumonkillsinhour"]["11"],
+            value["sumonkillsinhour"]["12"],
+            value["sumonkillsinhour"]["13"],
+            value["sumonkillsinhour"]["14"],
+            value["sumonkillsinhour"]["15"],
+            value["sumonkillsinhour"]["16"],
+            value["sumonkillsinhour"]["17"],
+            value["sumonkillsinhour"]["18"],
+            value["sumonkillsinhour"]["19"],
+            value["sumonkillsinhour"]["20"],
+            value["sumonkillsinhour"]["21"],
+            value["sumonkillsinhour"]["22"],
+            value["sumonkillsinhour"]["23"]))
     conn.commit()
 
 

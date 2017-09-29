@@ -1,5 +1,11 @@
 package com.fetoxdevelopments.wormboard.controller;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.Year;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -71,5 +77,16 @@ public class StatisticAggregatesController
   public List<ZwhAggregateBean> getStatsForYear(@RequestParam(value = "year", defaultValue = "") Long year)
   {
     return zwhAggregateWorker.getStatsForTimespan(year * 10000, year * 10000 + 9999);
+  }
+
+  @RequestMapping("/getStatsForLast90Days")
+  public List<ZwhAggregateBean> getStatsForYear()
+  {
+    LocalDate today = LocalDate.now();
+    LocalDate yesterday = today.minusDays(1);
+    LocalDate ninetyDaysAgo = today.minusDays(90);
+    Long yesterdayAsLong = yesterday.getYear() * 10000L + yesterday.getMonth().getValue() * 100L + yesterday.getDayOfMonth();
+    Long ninetyDaysAgoAsLong = ninetyDaysAgo.getYear() * 10000L + ninetyDaysAgo.getMonth().getValue() * 100L + ninetyDaysAgo.getDayOfMonth();
+    return zwhAggregateWorker.getStatsForTimespan(ninetyDaysAgoAsLong, yesterdayAsLong);
   }
 }

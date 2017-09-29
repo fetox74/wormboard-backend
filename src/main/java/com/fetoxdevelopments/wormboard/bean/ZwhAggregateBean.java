@@ -1,10 +1,5 @@
 package com.fetoxdevelopments.wormboard.bean;
 
-/* Data being transported to frontend. The stuff that is directly used in the data grid is precalculated, the timezone info however is not, as it is only shown
-   on demand and for a single corp, so it can be done in frontend without performance issues (I have no idea whether additional traffic or the actual
-   calculation have more performance impact).
- */
-
 public class ZwhAggregateBean
 {
   private String corporation;
@@ -15,11 +10,15 @@ public class ZwhAggregateBean
 
   private double kdratio;
 
+  private double kdefficiency;
+
   private double iskwon;
 
   private double isklost;
 
   private double netisk;
+
+  private double iskefficiency;
 
   private long numactive;
 
@@ -33,16 +32,19 @@ public class ZwhAggregateBean
 
   private double netiskperavgonkill;
 
-  public ZwhAggregateBean(String corporation, long kills, long losses, double kdratio, double iskwon, double isklost, double netisk, long numactive,
-                          double avgperkill, double iskperactive, double netiskperactive, double iskperavgonkill, double netiskperavgonkill)
+  public ZwhAggregateBean(String corporation, long kills, long losses, double kdratio, double kdefficiency, double iskwon, double isklost, double netisk,
+                          double iskefficiency, long numactive, double avgperkill, double iskperactive, double netiskperactive, double iskperavgonkill,
+                          double netiskperavgonkill)
   {
     this.corporation = corporation;
     this.kills = kills;
     this.losses = losses;
     this.kdratio = kdratio;
+    this.kdefficiency = kdefficiency;
     this.iskwon = iskwon;
     this.isklost = isklost;
     this.netisk = netisk;
+    this.iskefficiency = iskefficiency;
     this.numactive = numactive;
     this.avgperkill = avgperkill;
     this.iskperactive = iskperactive;
@@ -91,6 +93,16 @@ public class ZwhAggregateBean
     this.kdratio = kdratio;
   }
 
+  public double getKdefficiency()
+  {
+    return kdefficiency;
+  }
+
+  public void setKdefficiency(double kdefficiency)
+  {
+    this.kdefficiency = kdefficiency;
+  }
+
   public double getIskwon()
   {
     return iskwon;
@@ -119,6 +131,16 @@ public class ZwhAggregateBean
   public void setNetisk(double netisk)
   {
     this.netisk = netisk;
+  }
+
+  public double getIskefficiency()
+  {
+    return iskefficiency;
+  }
+
+  public void setIskefficiency(double iskefficiency)
+  {
+    this.iskefficiency = iskefficiency;
   }
 
   public long getNumactive()

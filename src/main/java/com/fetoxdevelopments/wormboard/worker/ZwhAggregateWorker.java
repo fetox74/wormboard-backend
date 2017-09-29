@@ -97,8 +97,10 @@ public class ZwhAggregateWorker
         double isklost = mapCorpIsklost.get(corporation);
         double netisk = iskwon - isklost;
         double kdratio = (double) kills / (double) losses;
-        result.add(new ZwhAggregateBean(corporation, kills, losses, kdratio, iskwon, isklost, netisk, numactive, avgperkill, iskwon / (double) numactive,
-                                        netisk / (double) numactive, iskwon / avgperkill, netisk / avgperkill));
+        double kdefficiency = (1 - (double) losses / (double) (kills + losses)) * 100.0;
+        double iskefficiency = (1 - isklost / (iskwon + isklost)) * 100.0;
+        result.add(new ZwhAggregateBean(corporation, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency, numactive, avgperkill,
+                                        iskwon / (double) numactive, netisk / (double) numactive, iskwon / avgperkill, netisk / avgperkill));
       }
     }
     aggStopwatch.stop();

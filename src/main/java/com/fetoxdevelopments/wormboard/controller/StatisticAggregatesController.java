@@ -61,6 +61,12 @@ public class StatisticAggregatesController
     return zwhAggregateWorker.getStatsForTimespan(month * 100, month * 100 + 99);
   }
 
+  @RequestMapping("/getStatsForQuarter")
+  public List<ZwhAggregateBean> getStatsForQuarter(@RequestParam(value = "quarter", defaultValue = "") Long quarter)
+  {
+    return zwhAggregateWorker.getStatsForTimespan(quarter * 100, (quarter + 2) * 100 + 99);
+  }
+
   @RequestMapping("/getStatsForYear")
   public List<ZwhAggregateBean> getStatsForYear(@RequestParam(value = "year", defaultValue = "") Long year)
   {

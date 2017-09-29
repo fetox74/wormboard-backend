@@ -1,12 +1,23 @@
 package com.fetoxdevelopments.wormboard.bean;
 
+/* Data being transported to frontend. The stuff that is directly used in the data grid is precalculated, the timezone info however is not, as it is only shown
+   on demand and for a single corp, so it can be done in frontend without performance issues (I have no idea whether additional traffic or the actual
+   calculation have more performance impact).
+ */
+
 public class ZwhAggregateBean
 {
   private String corporation;
 
   private long kills;
 
-  private double isk;
+  private long losses;
+
+  private double kdratio;
+
+  private double iskwon;
+
+  private double isklost;
 
   private double netisk;
 
@@ -22,12 +33,15 @@ public class ZwhAggregateBean
 
   private double netiskperavgonkill;
 
-  public ZwhAggregateBean(String corporation, long kills, double isk, double netisk, long numactive, double avgperkill, double iskperactive,
-                          double netiskperactive, double iskperavgonkill, double netiskperavgonkill)
+  public ZwhAggregateBean(String corporation, long kills, long losses, double kdratio, double iskwon, double isklost, double netisk, long numactive,
+                          double avgperkill, double iskperactive, double netiskperactive, double iskperavgonkill, double netiskperavgonkill)
   {
     this.corporation = corporation;
     this.kills = kills;
-    this.isk = isk;
+    this.losses = losses;
+    this.kdratio = kdratio;
+    this.iskwon = iskwon;
+    this.isklost = isklost;
     this.netisk = netisk;
     this.numactive = numactive;
     this.avgperkill = avgperkill;
@@ -57,14 +71,44 @@ public class ZwhAggregateBean
     this.kills = kills;
   }
 
-  public double getIsk()
+  public long getLosses()
   {
-    return isk;
+    return losses;
   }
 
-  public void setIsk(double isk)
+  public void setLosses(long losses)
   {
-    this.isk = isk;
+    this.losses = losses;
+  }
+
+  public double getKdratio()
+  {
+    return kdratio;
+  }
+
+  public void setKdratio(double kdratio)
+  {
+    this.kdratio = kdratio;
+  }
+
+  public double getIskwon()
+  {
+    return iskwon;
+  }
+
+  public void setIskwon(double iskwon)
+  {
+    this.iskwon = iskwon;
+  }
+
+  public double getIsklost()
+  {
+    return isklost;
+  }
+
+  public void setIsklost(double isklost)
+  {
+    this.isklost = isklost;
   }
 
   public double getNetisk()

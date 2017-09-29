@@ -45,10 +45,11 @@ public class ZwhAggregateWorker
     List<ZwhAggregateBean> result = new ArrayList<>();
 
     Map<String, Long> mapCorpKills = new HashMap<>();
-    Map<String, Double> mapCorpIsk = new HashMap<>();
+    Map<String, Long> mapCorpLosses = new HashMap<>();
+    Map<String, Double> mapCorpIskwon = new HashMap<>();
+    Map<String, Double> mapCorpIsklost = new HashMap<>();
     Map<String, Set<String>> mapCorpActive = new HashMap<>();
     Map<String, Long> mapCorpNumActive = new HashMap<>();
-    Map<String, Double> mapCorpNetIsk = new HashMap<>();
     Map<String, Long> mapCorpSumOnKills = new HashMap<>();
 
     Stopwatch dbStopwatch = Stopwatch.createStarted();
@@ -63,21 +64,22 @@ public class ZwhAggregateWorker
       if(mapCorpKills.containsKey(corporation))
       {
         mapCorpKills.put(corporation, mapCorpKills.get(corporation) + aggregate.getKills());
-        mapCorpIsk.put(corporation, mapCorpIsk.get(corporation) + aggregate.getIsk());
+        mapCorpLosses.put(corporation, mapCorpLosses.get(corporation) + aggregate.getLosses());
+        mapCorpIskwon.put(corporation, mapCorpIskwon.get(corporation) + aggregate.getIskwon());
+        mapCorpIsklost.put(corporation, mapCorpIsklost.get(corporation) + aggregate.getIsklost());
         Set<String> active = mapCorpActive.get(corporation);
         active.addAll(new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
-        //mapCorpActive.put(corporation, active);
         mapCorpNumActive.put(corporation, (long) active.size());
-        mapCorpNetIsk.put(corporation, mapCorpNetIsk.get(corporation) + aggregate.getNetisk());
         mapCorpSumOnKills.put(corporation, mapCorpSumOnKills.get(corporation) + aggregate.getSumonkills());
       }
       else
       {
         mapCorpKills.put(corporation, aggregate.getKills());
-        mapCorpIsk.put(corporation, aggregate.getIsk());
+        mapCorpLosses.put(corporation, aggregate.getLosses());
+        mapCorpIskwon.put(corporation, aggregate.getIskwon());
+        mapCorpIsklost.put(corporation, aggregate.getIsklost());
         mapCorpActive.put(corporation, new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
         mapCorpNumActive.put(corporation, aggregate.getNumactive());
-        mapCorpNetIsk.put(corporation, aggregate.getNetisk());
         mapCorpSumOnKills.put(corporation, aggregate.getSumonkills());
       }
     }
@@ -86,14 +88,17 @@ public class ZwhAggregateWorker
     {
       long numactive = mapCorpNumActive.get(corporation);
       long kills = mapCorpKills.get(corporation);
+      long losses = mapCorpLosses.get(corporation);
       double avgperkill = (double) mapCorpSumOnKills.get(corporation) / kills;
 
       if(numactive > 0 && avgperkill > 0.0 && !corporation.equals("Vigilant Tyrannos"))
       {
-        double isk = mapCorpIsk.get(corporation);
-        double netisk = mapCorpNetIsk.get(corporation);
-        result.add(new ZwhAggregateBean(corporation, kills, isk, netisk, numactive, avgperkill,isk / (double) numactive,
-                                        netisk / (double) numactive, isk / avgperkill, netisk / avgperkill));
+        double iskwon = mapCorpIskwon.get(corporation);
+        double isklost = mapCorpIsklost.get(corporation);
+        double netisk = iskwon - isklost;
+        double kdratio = (double) kills / (double) losses;
+        result.add(new ZwhAggregateBean(corporation, kills, losses, kdratio, iskwon, isklost, netisk, numactive, avgperkill, iskwon / (double) numactive,
+                                        netisk / (double) numactive, iskwon / avgperkill, netisk / avgperkill));
       }
     }
     aggStopwatch.stop();

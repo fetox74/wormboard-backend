@@ -1,333 +1,161 @@
-package com.fetoxdevelopments.wormboard.domain;
+package com.fetoxdevelopments.wormboard.bean;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
-
-@Entity
-@IdClass(ZwhAggregateId.class)
-@Table(name = "\"zwhAggregate\"", schema = "public", catalog = "staticdump")
-public class ZwhAggregateJPA
+public class ZwhHourlyAggregateBean
 {
-  @Id
-  @Column(name = "\"date\"")
-  private long date;
-
-  @Id
-  @Column(name = "\"corporation\"")
-  private String corporation;
-
-  @Basic
-  @Column(name = "\"kills\"")
-  private long kills;
-
-  @Basic
-  @Column(name = "\"losses\"")
-  private long losses;
-
-  @Basic
-  @Column(name = "\"iskwon\"")
-  private double iskwon;
-
-  @Basic
-  @Column(name = "\"isklost\"")
-  private double isklost;
-
-  @Basic
-  @Column(name = "\"active\"")
-  private String active;
-
-  @Basic
-  @Column(name = "\"numactive\"")
-  private long numactive;
-
-  @Basic
-  @Column(name = "\"sumonkills\"")
-  private long sumonkills;
-
-  @Basic
-  @Column(name = "\"killsinhour00\"")
   private long killsinhour00;
 
-  @Basic
-  @Column(name = "\"killsinhour01\"")
   private long killsinhour01;
 
-  @Basic
-  @Column(name = "\"killsinhour02\"")
   private long killsinhour02;
 
-  @Basic
-  @Column(name = "\"killsinhour03\"")
   private long killsinhour03;
 
-  @Basic
-  @Column(name = "\"killsinhour04\"")
   private long killsinhour04;
 
-  @Basic
-  @Column(name = "\"killsinhour05\"")
   private long killsinhour05;
 
-  @Basic
-  @Column(name = "\"killsinhour06\"")
   private long killsinhour06;
 
-  @Basic
-  @Column(name = "\"killsinhour07\"")
   private long killsinhour07;
 
-  @Basic
-  @Column(name = "\"killsinhour08\"")
   private long killsinhour08;
 
-  @Basic
-  @Column(name = "\"killsinhour09\"")
   private long killsinhour09;
 
-  @Basic
-  @Column(name = "\"killsinhour10\"")
   private long killsinhour10;
 
-  @Basic
-  @Column(name = "\"killsinhour11\"")
   private long killsinhour11;
 
-  @Basic
-  @Column(name = "\"killsinhour12\"")
   private long killsinhour12;
 
-  @Basic
-  @Column(name = "\"killsinhour13\"")
   private long killsinhour13;
 
-  @Basic
-  @Column(name = "\"killsinhour14\"")
   private long killsinhour14;
 
-  @Basic
-  @Column(name = "\"killsinhour15\"")
   private long killsinhour15;
 
-  @Basic
-  @Column(name = "\"killsinhour16\"")
   private long killsinhour16;
 
-  @Basic
-  @Column(name = "\"killsinhour17\"")
   private long killsinhour17;
 
-  @Basic
-  @Column(name = "\"killsinhour18\"")
   private long killsinhour18;
 
-  @Basic
-  @Column(name = "\"killsinhour19\"")
   private long killsinhour19;
 
-  @Basic
-  @Column(name = "\"killsinhour20\"")
   private long killsinhour20;
 
-  @Basic
-  @Column(name = "\"killsinhour21\"")
   private long killsinhour21;
 
-  @Basic
-  @Column(name = "\"killsinhour22\"")
   private long killsinhour22;
 
-  @Basic
-  @Column(name = "\"killsinhour23\"")
   private long killsinhour23;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour00\"")
   private long sumonkillsinhour00;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour01\"")
   private long sumonkillsinhour01;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour02\"")
   private long sumonkillsinhour02;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour03\"")
   private long sumonkillsinhour03;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour04\"")
   private long sumonkillsinhour04;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour05\"")
   private long sumonkillsinhour05;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour06\"")
   private long sumonkillsinhour06;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour07\"")
   private long sumonkillsinhour07;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour08\"")
   private long sumonkillsinhour08;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour09\"")
   private long sumonkillsinhour09;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour10\"")
   private long sumonkillsinhour10;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour11\"")
   private long sumonkillsinhour11;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour12\"")
   private long sumonkillsinhour12;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour13\"")
   private long sumonkillsinhour13;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour14\"")
   private long sumonkillsinhour14;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour15\"")
   private long sumonkillsinhour15;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour16\"")
   private long sumonkillsinhour16;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour17\"")
   private long sumonkillsinhour17;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour18\"")
   private long sumonkillsinhour18;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour19\"")
   private long sumonkillsinhour19;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour20\"")
   private long sumonkillsinhour20;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour21\"")
   private long sumonkillsinhour21;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour22\"")
   private long sumonkillsinhour22;
 
-  @Basic
-  @Column(name = "\"sumonkillsinhour23\"")
   private long sumonkillsinhour23;
 
-  public long getDate()
+  public ZwhHourlyAggregateBean(long killsinhour00, long killsinhour01, long killsinhour02, long killsinhour03, long killsinhour04, long killsinhour05,
+                                long killsinhour06, long killsinhour07, long killsinhour08, long killsinhour09, long killsinhour10, long killsinhour11,
+                                long killsinhour12, long killsinhour13, long killsinhour14, long killsinhour15, long killsinhour16, long killsinhour17,
+                                long killsinhour18, long killsinhour19, long killsinhour20, long killsinhour21, long killsinhour22, long killsinhour23,
+                                long sumonkillsinhour00, long sumonkillsinhour01, long sumonkillsinhour02, long sumonkillsinhour03, long sumonkillsinhour04,
+                                long sumonkillsinhour05, long sumonkillsinhour06, long sumonkillsinhour07, long sumonkillsinhour08, long sumonkillsinhour09,
+                                long sumonkillsinhour10, long sumonkillsinhour11, long sumonkillsinhour12, long sumonkillsinhour13, long sumonkillsinhour14,
+                                long sumonkillsinhour15, long sumonkillsinhour16, long sumonkillsinhour17, long sumonkillsinhour18, long sumonkillsinhour19,
+                                long sumonkillsinhour20, long sumonkillsinhour21, long sumonkillsinhour22, long sumonkillsinhour23)
   {
-    return date;
-  }
-
-  public void setDate(long date)
-  {
-    this.date = date;
-  }
-
-  public String getCorporation()
-  {
-    return corporation;
-  }
-
-  public void setCorporation(String corporation)
-  {
-    this.corporation = corporation;
-  }
-
-  public long getKills()
-  {
-    return kills;
-  }
-
-  public void setKills(long kills)
-  {
-    this.kills = kills;
-  }
-
-  public long getLosses()
-  {
-    return losses;
-  }
-
-  public void setLosses(long losses)
-  {
-    this.losses = losses;
-  }
-
-  public double getIskwon()
-  {
-    return iskwon;
-  }
-
-  public void setIskwon(double iskwon)
-  {
-    this.iskwon = iskwon;
-  }
-
-  public double getIsklost()
-  {
-    return isklost;
-  }
-
-  public void setIsklost(double isklost)
-  {
-    this.isklost = isklost;
-  }
-
-  public String getActive()
-  {
-    return active;
-  }
-
-  public void setActive(String active)
-  {
-    this.active = active;
-  }
-
-  public long getNumactive()
-  {
-    return numactive;
-  }
-
-  public void setNumactive(long numactive)
-  {
-    this.numactive = numactive;
-  }
-
-  public long getSumonkills()
-  {
-    return sumonkills;
-  }
-
-  public void setSumonkills(long sumonkills)
-  {
-    this.sumonkills = sumonkills;
+    this.killsinhour00 = killsinhour00;
+    this.killsinhour01 = killsinhour01;
+    this.killsinhour02 = killsinhour02;
+    this.killsinhour03 = killsinhour03;
+    this.killsinhour04 = killsinhour04;
+    this.killsinhour05 = killsinhour05;
+    this.killsinhour06 = killsinhour06;
+    this.killsinhour07 = killsinhour07;
+    this.killsinhour08 = killsinhour08;
+    this.killsinhour09 = killsinhour09;
+    this.killsinhour10 = killsinhour10;
+    this.killsinhour11 = killsinhour11;
+    this.killsinhour12 = killsinhour12;
+    this.killsinhour13 = killsinhour13;
+    this.killsinhour14 = killsinhour14;
+    this.killsinhour15 = killsinhour15;
+    this.killsinhour16 = killsinhour16;
+    this.killsinhour17 = killsinhour17;
+    this.killsinhour18 = killsinhour18;
+    this.killsinhour19 = killsinhour19;
+    this.killsinhour20 = killsinhour20;
+    this.killsinhour21 = killsinhour21;
+    this.killsinhour22 = killsinhour22;
+    this.killsinhour23 = killsinhour23;
+    this.sumonkillsinhour00 = sumonkillsinhour00;
+    this.sumonkillsinhour01 = sumonkillsinhour01;
+    this.sumonkillsinhour02 = sumonkillsinhour02;
+    this.sumonkillsinhour03 = sumonkillsinhour03;
+    this.sumonkillsinhour04 = sumonkillsinhour04;
+    this.sumonkillsinhour05 = sumonkillsinhour05;
+    this.sumonkillsinhour06 = sumonkillsinhour06;
+    this.sumonkillsinhour07 = sumonkillsinhour07;
+    this.sumonkillsinhour08 = sumonkillsinhour08;
+    this.sumonkillsinhour09 = sumonkillsinhour09;
+    this.sumonkillsinhour10 = sumonkillsinhour10;
+    this.sumonkillsinhour11 = sumonkillsinhour11;
+    this.sumonkillsinhour12 = sumonkillsinhour12;
+    this.sumonkillsinhour13 = sumonkillsinhour13;
+    this.sumonkillsinhour14 = sumonkillsinhour14;
+    this.sumonkillsinhour15 = sumonkillsinhour15;
+    this.sumonkillsinhour16 = sumonkillsinhour16;
+    this.sumonkillsinhour17 = sumonkillsinhour17;
+    this.sumonkillsinhour18 = sumonkillsinhour18;
+    this.sumonkillsinhour19 = sumonkillsinhour19;
+    this.sumonkillsinhour20 = sumonkillsinhour20;
+    this.sumonkillsinhour21 = sumonkillsinhour21;
+    this.sumonkillsinhour22 = sumonkillsinhour22;
+    this.sumonkillsinhour23 = sumonkillsinhour23;
   }
 
   public long getKillsinhour00()

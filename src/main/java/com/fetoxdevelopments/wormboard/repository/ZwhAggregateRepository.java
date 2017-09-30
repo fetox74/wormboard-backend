@@ -24,4 +24,10 @@ public interface ZwhAggregateRepository
          + " FROM ZwhAggregateJPA zwhAggregate"
          + " WHERE date >= :dateBegin AND date <= :dateEnd")
   List<ZwhAggregateJPA> findBetweenDates(@Param("dateBegin") Long dateBegin, @Param("dateEnd") Long dateEnd);
+
+  @Query("SELECT zwhAggregate"
+         + " FROM ZwhAggregateJPA zwhAggregate"
+         + " WHERE date >= :dateBegin AND date <= :dateEnd"
+         + " AND corporation = :corporation")
+  List<ZwhAggregateJPA> findForCorpBetweenDates(@Param("corporation") String corporation, @Param("dateBegin") Long dateBegin, @Param("dateEnd") Long dateEnd);
 }

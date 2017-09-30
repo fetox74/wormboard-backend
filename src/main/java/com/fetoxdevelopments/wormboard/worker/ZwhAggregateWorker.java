@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import com.fetoxdevelopments.wormboard.bean.ZwhAggregateBean;
+import com.fetoxdevelopments.wormboard.bean.ZwhHourlyAggregateBean;
 import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
 import com.fetoxdevelopments.wormboard.repository.ZwhAggregateRepository;
 import com.fetoxdevelopments.wormboard.status.ResponseTime;
@@ -109,5 +111,77 @@ public class ZwhAggregateWorker
     responseTime.addNewRequest((double)dbStopwatch.elapsed(TimeUnit.MILLISECONDS), (double)aggStopwatch.elapsed(TimeUnit.MILLISECONDS));
 
     return result;
+  }
+
+  public ZwhHourlyAggregateBean getHourlyStatsForCorpAndTimespan(String corporation, Long dateBegin, Long dateEnd)
+  {
+    long[] kills = new long[24];
+    long[] sumonkills = new long[24];
+    double[] avgkillsperday = new double[24];
+    double[] avgonkills = new double[24];
+    int daysCounted = 0;
+
+    List<ZwhAggregateJPA> aggregates = zwhAggregateRepository.findForCorpBetweenDates(corporation, dateBegin, dateEnd);
+
+    for(ZwhAggregateJPA aggregate : aggregates)
+    {
+      kills[0] += aggregate.getKillsinhour00();
+      sumonkills[0] += aggregate.getSumonkillsinhour00();
+      kills[1] += aggregate.getKillsinhour01();
+      sumonkills[1] += aggregate.getSumonkillsinhour01();
+      kills[2] += aggregate.getKillsinhour02();
+      sumonkills[2] += aggregate.getSumonkillsinhour02();
+      kills[3] += aggregate.getKillsinhour03();
+      sumonkills[3] += aggregate.getSumonkillsinhour03();
+      kills[4] += aggregate.getKillsinhour04();
+      sumonkills[4] += aggregate.getSumonkillsinhour04();
+      kills[5] += aggregate.getKillsinhour05();
+      sumonkills[5] += aggregate.getSumonkillsinhour05();
+      kills[6] += aggregate.getKillsinhour06();
+      sumonkills[6] += aggregate.getSumonkillsinhour06();
+      kills[7] += aggregate.getKillsinhour07();
+      sumonkills[7] += aggregate.getSumonkillsinhour07();
+      kills[8] += aggregate.getKillsinhour08();
+      sumonkills[8] += aggregate.getSumonkillsinhour08();
+      kills[9] += aggregate.getKillsinhour09();
+      sumonkills[9] += aggregate.getSumonkillsinhour09();
+      kills[10] += aggregate.getKillsinhour10();
+      sumonkills[10] += aggregate.getSumonkillsinhour10();
+      kills[11] += aggregate.getKillsinhour11();
+      sumonkills[11] += aggregate.getSumonkillsinhour11();
+      kills[12] += aggregate.getKillsinhour12();
+      sumonkills[12] += aggregate.getSumonkillsinhour12();
+      kills[13] += aggregate.getKillsinhour13();
+      sumonkills[13] += aggregate.getSumonkillsinhour13();
+      kills[14] += aggregate.getKillsinhour14();
+      sumonkills[14] += aggregate.getSumonkillsinhour14();
+      kills[15] += aggregate.getKillsinhour15();
+      sumonkills[15] += aggregate.getSumonkillsinhour15();
+      kills[16] += aggregate.getKillsinhour16();
+      sumonkills[16] += aggregate.getSumonkillsinhour16();
+      kills[17] += aggregate.getKillsinhour17();
+      sumonkills[17] += aggregate.getSumonkillsinhour17();
+      kills[18] += aggregate.getKillsinhour18();
+      sumonkills[18] += aggregate.getSumonkillsinhour18();
+      kills[19] += aggregate.getKillsinhour19();
+      sumonkills[19] += aggregate.getSumonkillsinhour19();
+      kills[20] += aggregate.getKillsinhour20();
+      sumonkills[20] += aggregate.getSumonkillsinhour20();
+      kills[21] += aggregate.getKillsinhour21();
+      sumonkills[21] += aggregate.getSumonkillsinhour21();
+      kills[22] += aggregate.getKillsinhour22();
+      sumonkills[22] += aggregate.getSumonkillsinhour22();
+      kills[23] += aggregate.getKillsinhour23();
+      sumonkills[23] += aggregate.getSumonkillsinhour23();
+      daysCounted++;
+    }
+
+    final int days = daysCounted;
+
+    IntStream.range(0, 24)
+      .forEach(i -> {avgonkills[i] = kills[i] == 0 ? 0.0 : (double) sumonkills[i] / (double) kills[i];
+                     avgkillsperday[i] = days == 0 ? 0.0 : (double) kills[i] / (double) days;});
+
+    return new ZwhHourlyAggregateBean(kills, sumonkills, avgkillsperday, avgonkills);
   }
 }

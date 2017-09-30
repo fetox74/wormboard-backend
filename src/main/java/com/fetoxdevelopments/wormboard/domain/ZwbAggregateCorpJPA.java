@@ -7,8 +7,10 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
 
+import com.fetoxdevelopments.wormboard.domain.compositekeys.ZwhAggregateCorpId;
+
 @Entity
-@IdClass(ZwhAggregateId.class)
+@IdClass(ZwhAggregateCorpId.class)
 @Table(name = "\"zwbAggregateCorp\"", schema = "public", catalog = "staticdump")
 public class ZwbAggregateCorpJPA
 {

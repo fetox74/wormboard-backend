@@ -1,8 +1,8 @@
-package com.fetoxdevelopments.wormboard.domain;
+package com.fetoxdevelopments.wormboard.domain.compositekeys;
 
 import java.io.Serializable;
 
-public class ZwhAggregateId
+public class ZwhAggregateCorpId
   implements Serializable
 {
   long date;

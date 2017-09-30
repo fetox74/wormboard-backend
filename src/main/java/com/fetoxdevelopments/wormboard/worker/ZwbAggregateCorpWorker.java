@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-import com.fetoxdevelopments.wormboard.bean.ZwhAggregateBean;
-import com.fetoxdevelopments.wormboard.bean.ZwhHourlyAggregateBean;
-import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
-import com.fetoxdevelopments.wormboard.repository.ZwhAggregateRepository;
+import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
+import com.fetoxdevelopments.wormboard.bean.ZwbHourlyAggregateCorpBean;
+import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
+import com.fetoxdevelopments.wormboard.repository.ZwbAggregateCorpRepository;
 import com.fetoxdevelopments.wormboard.status.ResponseTime;
 import com.google.common.base.Stopwatch;
 import org.apache.log4j.LogManager;
@@ -22,29 +22,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ZwhAggregateWorker
+public class ZwbAggregateCorpWorker
 {
-  private static final Logger LOG = LogManager.getLogger(ZwhAggregateWorker.class);
+  private static final Logger LOG = LogManager.getLogger(ZwbAggregateCorpWorker.class);
 
   @Autowired
-  private ZwhAggregateRepository zwhAggregateRepository;
+  private ZwbAggregateCorpRepository zwbAggregateCorpRepository;
 
   @Autowired
   private ResponseTime responseTime;
 
-  public List<ZwhAggregateJPA> getRawStatsForDay(Long date)
+  public List<ZwbAggregateCorpJPA> getRawStatsForDay(Long date)
   {
-    return zwhAggregateRepository.findByDate(date);
+    return zwbAggregateCorpRepository.findByDate(date);
   }
 
   public List<Long> getAllDates()
   {
-    return zwhAggregateRepository.findAllDates();
+    return zwbAggregateCorpRepository.findAllDates();
   }
 
-  public List<ZwhAggregateBean> getStatsForTimespan(Long dateBegin, Long dateEnd)
+  public List<ZwbAggregateCorpBean> getStatsForTimespan(Long dateBegin, Long dateEnd)
   {
-    List<ZwhAggregateBean> result = new ArrayList<>();
+    List<ZwbAggregateCorpBean> result = new ArrayList<>();
 
     Map<String, Long> mapCorpKills = new HashMap<>();
     Map<String, Long> mapCorpLosses = new HashMap<>();
@@ -55,12 +55,12 @@ public class ZwhAggregateWorker
     Map<String, Long> mapCorpSumOnKills = new HashMap<>();
 
     Stopwatch dbStopwatch = Stopwatch.createStarted();
-    List<ZwhAggregateJPA> aggregates = zwhAggregateRepository.findBetweenDates(dateBegin, dateEnd);
+    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findBetweenDates(dateBegin, dateEnd);
     dbStopwatch.stop();
     LOG.info("DB access in " + dbStopwatch.toString());
 
     Stopwatch aggStopwatch = Stopwatch.createStarted();
-    for(ZwhAggregateJPA aggregate : aggregates)
+    for(ZwbAggregateCorpJPA aggregate : aggregates)
     {
       String corporation = aggregate.getCorporation();
       if(mapCorpKills.containsKey(corporation))
@@ -101,7 +101,7 @@ public class ZwhAggregateWorker
         double kdratio = (double) kills / (double) losses;
         double kdefficiency = (1 - (double) losses / (double) (kills + losses)) * 100.0;
         double iskefficiency = (1 - isklost / (iskwon + isklost)) * 100.0;
-        result.add(new ZwhAggregateBean(corporation, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency, numactive, avgperkill,
+        result.add(new ZwbAggregateCorpBean(corporation, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency, numactive, avgperkill,
                                         iskwon / (double) numactive, netisk / (double) numactive, iskwon / avgperkill, netisk / avgperkill));
       }
     }
@@ -113,7 +113,7 @@ public class ZwhAggregateWorker
     return result;
   }
 
-  public ZwhHourlyAggregateBean getHourlyStatsForCorpAndTimespan(String corporation, Long dateBegin, Long dateEnd)
+  public ZwbHourlyAggregateCorpBean getHourlyStatsForCorpAndTimespan(String corporation, Long dateBegin, Long dateEnd)
   {
     long[] kills = new long[24];
     long[] sumonkills = new long[24];
@@ -121,9 +121,9 @@ public class ZwhAggregateWorker
     double[] avgonkills = new double[24];
     int daysCounted = 0;
 
-    List<ZwhAggregateJPA> aggregates = zwhAggregateRepository.findForCorpBetweenDates(corporation, dateBegin, dateEnd);
+    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporation, dateBegin, dateEnd);
 
-    for(ZwhAggregateJPA aggregate : aggregates)
+    for(ZwbAggregateCorpJPA aggregate : aggregates)
     {
       kills[0] += aggregate.getKillsinhour00();
       sumonkills[0] += aggregate.getSumonkillsinhour00();
@@ -182,6 +182,6 @@ public class ZwhAggregateWorker
       .forEach(i -> {avgonkills[i] = kills[i] == 0 ? 0.0 : (double) sumonkills[i] / (double) kills[i];
                      avgkillsperday[i] = days == 0 ? 0.0 : (double) kills[i] / (double) days;});
 
-    return new ZwhHourlyAggregateBean(kills, sumonkills, avgkillsperday, avgonkills);
+    return new ZwbHourlyAggregateCorpBean(kills, sumonkills, avgkillsperday, avgonkills);
   }
 }

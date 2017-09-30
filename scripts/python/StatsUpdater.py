@@ -76,8 +76,14 @@ def getZKB(id):
         return None
 
 
-def getFinalHitCorp(attackers):
+def getFinalHitCorpAndUpdateAttackers(attackers, value):
     for attacker in attackers:
+        if "corporation" in attacker:
+            knownCorporationDict[attacker["corporation"]["id"]] = attacker["corporation"]["name"]
+        if "character" in attacker:
+            character = attacker["character"]["name"]
+            knownCharacterDict[attacker["character"]["id"]] = character
+            updateCharacter(character, 1, 0, value, 0.0)
         if attacker["finalBlow"]:
             if "corporation" in attacker:
                 return attacker["corporation"]["name"]
@@ -119,11 +125,25 @@ def getHourDict():
     return result
 
 
+def updateCharacter(character, kills, losses, iskwon, isklost):
+    if character in characterDict:
+        characterDict[character]["kills"] = characterDict[character]["kills"] + kills
+        characterDict[character]["losses"] = characterDict[character]["losses"] + losses
+        characterDict[character]["iskwon"] = characterDict[character]["iskwon"] + iskwon
+        characterDict[character]["isklost"] = characterDict[character]["isklost"] + isklost
+    else:
+        characterDict[character] = {"kills": kills, "losses": losses, "iskwon": iskwon, "isklost": isklost}
 
-def updateMasterDict(killmailCREST, killmailZKB):
+
+def updateDictionaries(killmailCREST, killmailZKB):
     if killmailZKB:
-        finalHitCorp = getFinalHitCorp(killmailCREST["attackers"])
+        finalHitCorp = getFinalHitCorpAndUpdateAttackers(killmailCREST["attackers"], killmailZKB["zkb"]["totalValue"])
         victimCorp = killmailCREST["victim"]["corporation"]["name"]
+        knownCorporationDict[killmailCREST["victim"]["corporation"]["id"]] = victimCorp
+        if "character" in killmailCREST["victim"]:
+            character = killmailCREST["victim"]["character"]["name"]
+            knownCharacterDict[killmailCREST["victim"]["character"]["id"]] = character
+            updateCharacter(character, 0, 1, 0.0, killmailZKB["zkb"]["totalValue"])
         if finalHitCorp != "":
             attackersOfFinalHitCorp = getAttackersOfCorp(killmailCREST["attackers"], finalHitCorp)
             if finalHitCorp in masterDict:
@@ -146,7 +166,7 @@ def updateMasterDict(killmailCREST, killmailZKB):
 
 
 def queryAggregateAlreadyInDB(cur, date, corp):
-    cur.execute('SELECT * FROM "zwhAggregate" WHERE "date" = ' + date + ' AND "corporation" = ' "'" + corp + "'")
+    cur.execute('SELECT * FROM "zwbAggregateCorp" WHERE "date" = ' + date + ' AND "corporation" = ' "'" + corp + "'")
     if len(cur.fetchall()) > 0:
         return True
     else:
@@ -154,10 +174,10 @@ def queryAggregateAlreadyInDB(cur, date, corp):
 
 
 def updateDB(cur, date):
-    cur.execute('DELETE FROM "zwhAggregate" WHERE "date" = %i' % int(date))
+    cur.execute('DELETE FROM "zwbAggregateCorp" WHERE "date" = %i' % int(date))
     for key, value in masterDict.items():
         cur.execute(
-            '''INSERT INTO "zwhAggregate" ("date", "corporation", "kills", "losses", "iskwon", "isklost", "active", "numactive", "sumonkills", 
+            '''INSERT INTO "zwbAggregateCorp" ("date", "corporation", "kills", "losses", "iskwon", "isklost", "active", "numactive", "sumonkills", 
             "killsinhour00", "killsinhour01", "killsinhour02", "killsinhour03", "killsinhour04", "killsinhour05", "killsinhour06", "killsinhour07", 
             "killsinhour08", "killsinhour09", "killsinhour10", "killsinhour11", "killsinhour12", "killsinhour13", "killsinhour14", "killsinhour15", 
             "killsinhour16", "killsinhour17", "killsinhour18", "killsinhour19", "killsinhour20", "killsinhour21", "killsinhour22", "killsinhour23", 
@@ -225,12 +245,24 @@ def updateDB(cur, date):
             value["sumonkillsinhour"]["21"],
             value["sumonkillsinhour"]["22"],
             value["sumonkillsinhour"]["23"]))
+
+    for key, value in knownCharacterDict.items():
+        cur.execute('INSERT INTO "zwbKnownCharacter" ("id", "name") SELECT %i, %s WHERE NOT EXISTS (SELECT 1 FROM "zwbKnownCharacter" WHERE id = %i)' %
+                    (key, "'" + value.replace("'", "''") + "'", key))
+
+    for key, value in knownCorporationDict.items():
+        cur.execute('INSERT INTO "zwbKnownCorporation" ("id", "name") SELECT %i, %s WHERE NOT EXISTS (SELECT 1 FROM "zwbKnownCorporation" WHERE id = %i)' %
+                    (key, "'" + value.replace("'", "''") + "'", key))
+
+    for key, value in characterDict.items():
+        cur.execute('INSERT INTO "zwbAggregateChar" ("date", "character", "kills", "losses", "iskwon", "isklost") VALUES (%i, %s, %i, %i, %f, %f)' %
+                    (int(date), "'" + key.replace("'", "''") + "'", value["kills"], value["losses"], value["iskwon"], value["isklost"]))
     conn.commit()
 
 
-DATES = ["20170201", "20170202", "20170203", "20170204", "20170205", "20170206", "20170207", "20170208", "20170209", "20170210"]
-#DATES = ["20160111", "20160112", "20160113", "20160114", "20160115", "20160116", "20160117", "20160118", "20160119", "20160120"]
-#DATES = ["20160121", "20160122", "20160123", "20160124", "20160125", "20160126", "20160127", "20160128", "20160129", "20160130", "20160131"]
+DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110"]
+#DATES = ["20170111", "20170112", "20170113", "20170114", "20170115", "20170116", "20170117", "20170118", "20170119", "20170120"]
+#DATES = ["20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131"]
 reJMail = re.compile("J[0-9]{6}")
 
 try:
@@ -245,7 +277,10 @@ for date in DATES:
     jMailCounter = 0
     dictKillmailIdHash = getKillmailHashes(date)
     masterDict = {}
+    characterDict = {}
     lossDict = {}
+    knownCharacterDict = {}
+    knownCorporationDict = {}
 
     print "processing " + date
     chunks = partition(dictKillmailIdHash)
@@ -257,7 +292,7 @@ for date in DATES:
 
         for killmailCREST in results:
             if killmailCREST != [] and (reJMail.match(killmailCREST["solarSystem"]["name"]) or killmailCREST["solarSystem"]["name"] == "J1226-0"):
-                updateMasterDict(killmailCREST, getZKB(killmailCREST["killID_str"]))
+                updateDictionaries(killmailCREST, getZKB(killmailCREST["killID_str"]))
                 jMailCounter += 1
             elif not killmailCREST:  # 20160824 has the problematic first Keepstar kill that does not appear on CREST, this (and the above killmailCREST != []) is a temporary fix..
                 print("[] error...")

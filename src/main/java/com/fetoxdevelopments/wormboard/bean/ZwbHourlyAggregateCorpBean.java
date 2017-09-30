@@ -1,6 +1,6 @@
 package com.fetoxdevelopments.wormboard.bean;
 
-public class ZwhHourlyAggregateBean
+public class ZwbHourlyAggregateCorpBean
 {
   private long[] kills;
 
@@ -10,7 +10,7 @@ public class ZwhHourlyAggregateBean
 
   private double[] avgonkills;
 
-  public ZwhHourlyAggregateBean(long[] kills, long[] sumonkills, double[] avgkillsperdayactive, double[] avgonkills)
+  public ZwbHourlyAggregateCorpBean(long[] kills, long[] sumonkills, double[] avgkillsperdayactive, double[] avgonkills)
   {
     this.kills = kills;
     this.sumonkills = sumonkills;

@@ -9,8 +9,8 @@ import javax.persistence.Table;
 
 @Entity
 @IdClass(ZwhAggregateId.class)
-@Table(name = "\"zwhAggregate\"", schema = "public", catalog = "staticdump")
-public class ZwhAggregateJPA
+@Table(name = "\"zwbAggregateCorp\"", schema = "public", catalog = "staticdump")
+public class ZwbAggregateCorpJPA
 {
   @Id
   @Column(name = "\"date\"")

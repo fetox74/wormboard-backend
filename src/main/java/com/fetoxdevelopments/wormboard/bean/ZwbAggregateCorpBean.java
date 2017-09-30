@@ -1,6 +1,6 @@
 package com.fetoxdevelopments.wormboard.bean;
 
-public class ZwhAggregateBean
+public class ZwbAggregateCorpBean
 {
   private String corporation;
 
@@ -32,9 +32,9 @@ public class ZwhAggregateBean
 
   private double netiskperavgonkill;
 
-  public ZwhAggregateBean(String corporation, long kills, long losses, double kdratio, double kdefficiency, double iskwon, double isklost, double netisk,
-                          double iskefficiency, long numactive, double avgperkill, double iskperactive, double netiskperactive, double iskperavgonkill,
-                          double netiskperavgonkill)
+  public ZwbAggregateCorpBean(String corporation, long kills, long losses, double kdratio, double kdefficiency, double iskwon, double isklost, double netisk,
+                              double iskefficiency, long numactive, double avgperkill, double iskperactive, double netiskperactive, double iskperavgonkill,
+                              double netiskperavgonkill)
   {
     this.corporation = corporation;
     this.kills = kills;

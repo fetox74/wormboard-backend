@@ -1,4 +1,4 @@
-CREATE TABLE "zwhAggregate"
+CREATE TABLE "zwbAggregateCorp"
 (
     date integer NOT NULL,
     corporation text NOT NULL,
@@ -57,5 +57,30 @@ CREATE TABLE "zwhAggregate"
     sumonkillsinhour21 integer NOT NULL,
     sumonkillsinhour22 integer NOT NULL,
     sumonkillsinhour23 integer NOT NULL,
-    CONSTRAINT "pk_zwhAggregate" PRIMARY KEY (corporation, date)
+    CONSTRAINT "pk_zwbAggregateCorp" PRIMARY KEY (corporation, date)
+)
+
+CREATE TABLE "zwbAggregateChar"
+(
+    date integer NOT NULL,
+    character text NOT NULL,
+    kills integer NOT NULL,
+    losses integer NOT NULL,
+    iskwon double precision NOT NULL,
+    isklost double precision NOT NULL,
+    CONSTRAINT "pk_zwbAggregateChar" PRIMARY KEY (character, date)
+)
+
+CREATE TABLE "zwbKnownCharacter"
+(
+    id integer NOT NULL,
+    name varchar(255) NOT NULL,
+    CONSTRAINT "pk_zwbKnownCharacter" PRIMARY KEY (id)
+)
+
+CREATE TABLE "zwbKnownCorporation"
+(
+    id integer NOT NULL,
+    name varchar(255) NOT NULL,
+    CONSTRAINT "pk_zwbKnownCorporation" PRIMARY KEY (id)
 )

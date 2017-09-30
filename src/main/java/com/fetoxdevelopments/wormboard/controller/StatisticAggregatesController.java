@@ -1,22 +1,17 @@
 package com.fetoxdevelopments.wormboard.controller;
 
 import java.time.LocalDate;
-import java.time.Period;
-import java.time.Year;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalField;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.fetoxdevelopments.wormboard.bean.ServerStatusBean;
-import com.fetoxdevelopments.wormboard.bean.ZwhAggregateBean;
-import com.fetoxdevelopments.wormboard.bean.ZwhHourlyAggregateBean;
-import com.fetoxdevelopments.wormboard.domain.ZwhAggregateJPA;
+import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
+import com.fetoxdevelopments.wormboard.bean.ZwbHourlyAggregateCorpBean;
+import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
 import com.fetoxdevelopments.wormboard.status.ResponseTime;
-import com.fetoxdevelopments.wormboard.worker.ZwhAggregateWorker;
+import com.fetoxdevelopments.wormboard.worker.ZwbAggregateCorpWorker;
 import com.google.common.base.Joiner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,15 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class StatisticAggregatesController
 {
   @Autowired
-  private ZwhAggregateWorker zwhAggregateWorker;
+  private ZwbAggregateCorpWorker zwbAggregateCorpWorker;
 
   @Autowired
   private ResponseTime responseTime;
 
   @RequestMapping("/getRawStatsForDay")
-  public List<ZwhAggregateJPA> getRawStatsForDay(@RequestParam(value = "date", defaultValue = "") Long date)
+  public List<ZwbAggregateCorpJPA> getRawStatsForDay(@RequestParam(value = "date", defaultValue = "") Long date)
   {
-    return zwhAggregateWorker.getRawStatsForDay(date);
+    return zwbAggregateCorpWorker.getRawStatsForDay(date);
   }
 
   @RequestMapping("/getServerStatus")
@@ -43,7 +38,7 @@ public class StatisticAggregatesController
   {
     String statusMsg;
     Set<String> allMonth = new LinkedHashSet<>();
-    List<Long> allDates = zwhAggregateWorker.getAllDates();
+    List<Long> allDates = zwbAggregateCorpWorker.getAllDates();
 
     String latestProcessedDate = allDates.get(allDates.size() - 1).toString();
 
@@ -63,63 +58,63 @@ public class StatisticAggregatesController
   }
 
   @RequestMapping("/getStatsForMonth")
-  public List<ZwhAggregateBean> getStatsForMonth(@RequestParam(value = "month", defaultValue = "") Long month)
+  public List<ZwbAggregateCorpBean> getStatsForMonth(@RequestParam(value = "month", defaultValue = "") Long month)
   {
-    return zwhAggregateWorker.getStatsForTimespan(month * 100, month * 100 + 99);
+    return zwbAggregateCorpWorker.getStatsForTimespan(month * 100, month * 100 + 99);
   }
 
   @RequestMapping("/getStatsForQuarter")
-  public List<ZwhAggregateBean> getStatsForQuarter(@RequestParam(value = "quarter", defaultValue = "") Long quarter)
+  public List<ZwbAggregateCorpBean> getStatsForQuarter(@RequestParam(value = "quarter", defaultValue = "") Long quarter)
   {
-    return zwhAggregateWorker.getStatsForTimespan(quarter * 100, (quarter + 2) * 100 + 99);
+    return zwbAggregateCorpWorker.getStatsForTimespan(quarter * 100, (quarter + 2) * 100 + 99);
   }
 
   @RequestMapping("/getStatsForYear")
-  public List<ZwhAggregateBean> getStatsForYear(@RequestParam(value = "year", defaultValue = "") Long year)
+  public List<ZwbAggregateCorpBean> getStatsForYear(@RequestParam(value = "year", defaultValue = "") Long year)
   {
-    return zwhAggregateWorker.getStatsForTimespan(year * 10000, year * 10000 + 9999);
+    return zwbAggregateCorpWorker.getStatsForTimespan(year * 10000, year * 10000 + 9999);
   }
 
   @RequestMapping("/getStatsForLast90Days")
-  public List<ZwhAggregateBean> getStatsForLast90Days()
+  public List<ZwbAggregateCorpBean> getStatsForLast90Days()
   {
     LocalDate today = LocalDate.now();
     LocalDate yesterday = today.minusDays(1);
     LocalDate ninetyDaysAgo = today.minusDays(90);
     Long yesterdayAsLong = yesterday.getYear() * 10000L + yesterday.getMonth().getValue() * 100L + yesterday.getDayOfMonth();
     Long ninetyDaysAgoAsLong = ninetyDaysAgo.getYear() * 10000L + ninetyDaysAgo.getMonth().getValue() * 100L + ninetyDaysAgo.getDayOfMonth();
-    return zwhAggregateWorker.getStatsForTimespan(ninetyDaysAgoAsLong, yesterdayAsLong);
+    return zwbAggregateCorpWorker.getStatsForTimespan(ninetyDaysAgoAsLong, yesterdayAsLong);
   }
 
   @RequestMapping("/getHourlyCorpStatsForMonth")
-  public ZwhHourlyAggregateBean getHourlyCorpStatsForMonth(@RequestParam(value = "corporation", defaultValue = "") String corporation,
-                                                           @RequestParam(value = "month", defaultValue = "") Long month)
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForMonth(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+                                                               @RequestParam(value = "month", defaultValue = "") Long month)
   {
-    return zwhAggregateWorker.getHourlyStatsForCorpAndTimespan(corporation, month * 100, month * 100 + 99);
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, month * 100, month * 100 + 99);
   }
 
   @RequestMapping("/getHourlyCorpStatsForQuarter")
-  public ZwhHourlyAggregateBean getHourlyCorpStatsForQuarter(@RequestParam(value = "corporation", defaultValue = "") String corporation,
-                                                             @RequestParam(value = "quarter", defaultValue = "") Long quarter)
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForQuarter(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+                                                                 @RequestParam(value = "quarter", defaultValue = "") Long quarter)
   {
-    return zwhAggregateWorker.getHourlyStatsForCorpAndTimespan(corporation, quarter * 100, (quarter + 2) * 100 + 99);
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, quarter * 100, (quarter + 2) * 100 + 99);
   }
 
   @RequestMapping("/getHourlyCorpStatsForYear")
-  public ZwhHourlyAggregateBean getHourlyCorpStatsForYear(@RequestParam(value = "corporation", defaultValue = "") String corporation,
-                                                          @RequestParam(value = "year", defaultValue = "") Long year)
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForYear(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+                                                              @RequestParam(value = "year", defaultValue = "") Long year)
   {
-    return zwhAggregateWorker.getHourlyStatsForCorpAndTimespan(corporation, year * 10000, year * 10000 + 9999);
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, year * 10000, year * 10000 + 9999);
   }
 
   @RequestMapping("/getHourlyCorpStatsForLast90Days")
-  public ZwhHourlyAggregateBean getHourlyCorpStatsForLast90Days(@RequestParam(value = "corporation", defaultValue = "") String corporation)
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForLast90Days(@RequestParam(value = "corporation", defaultValue = "") String corporation)
   {
     LocalDate today = LocalDate.now();
     LocalDate yesterday = today.minusDays(1);
     LocalDate ninetyDaysAgo = today.minusDays(90);
     Long yesterdayAsLong = yesterday.getYear() * 10000L + yesterday.getMonth().getValue() * 100L + yesterday.getDayOfMonth();
     Long ninetyDaysAgoAsLong = ninetyDaysAgo.getYear() * 10000L + ninetyDaysAgo.getMonth().getValue() * 100L + ninetyDaysAgo.getDayOfMonth();
-    return zwhAggregateWorker.getHourlyStatsForCorpAndTimespan(corporation, ninetyDaysAgoAsLong, yesterdayAsLong);
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, ninetyDaysAgoAsLong, yesterdayAsLong);
   }
 }

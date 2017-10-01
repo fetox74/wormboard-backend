@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.fetoxdevelopments.wormboard.bean.ServerStatusBean;
+import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCharBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbHourlyAggregateCorpBean;
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
 import com.fetoxdevelopments.wormboard.status.ResponseTime;
+import com.fetoxdevelopments.wormboard.worker.ZwbAggregateCharWorker;
 import com.fetoxdevelopments.wormboard.worker.ZwbAggregateCorpWorker;
 import com.google.common.base.Joiner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class StatisticAggregatesController
 {
   @Autowired
   private ZwbAggregateCorpWorker zwbAggregateCorpWorker;
+
+  @Autowired
+  private ZwbAggregateCharWorker zwbAggregateCharWorker;
 
   @Autowired
   private ResponseTime responseTime;
@@ -116,5 +121,37 @@ public class StatisticAggregatesController
     Long yesterdayAsLong = yesterday.getYear() * 10000L + yesterday.getMonth().getValue() * 100L + yesterday.getDayOfMonth();
     Long ninetyDaysAgoAsLong = ninetyDaysAgo.getYear() * 10000L + ninetyDaysAgo.getMonth().getValue() * 100L + ninetyDaysAgo.getDayOfMonth();
     return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, ninetyDaysAgoAsLong, yesterdayAsLong);
+  }
+
+  @RequestMapping("/getCorpActivePlayerStatsForMonth")
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForMonth(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+                                                                     @RequestParam(value = "month", defaultValue = "") Long month)
+  {
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporation, month * 100, month * 100 + 99);
+  }
+
+  @RequestMapping("/getCorpActivePlayerStatsForQuarter")
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForQuarter(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+                                                                       @RequestParam(value = "quarter", defaultValue = "") Long quarter)
+  {
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporation, quarter * 100, (quarter + 2) * 100 + 99);
+  }
+
+  @RequestMapping("/getCorpActivePlayerStatsForYear")
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForYear(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+                                                                    @RequestParam(value = "year", defaultValue = "") Long year)
+  {
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporation, year * 10000, year * 10000 + 9999);
+  }
+
+  @RequestMapping("/getCorpActivePlayerStatsForLast90Days")
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForLast90Days(@RequestParam(value = "corporation", defaultValue = "") String corporation)
+  {
+    LocalDate today = LocalDate.now();
+    LocalDate yesterday = today.minusDays(1);
+    LocalDate ninetyDaysAgo = today.minusDays(90);
+    Long yesterdayAsLong = yesterday.getYear() * 10000L + yesterday.getMonth().getValue() * 100L + yesterday.getDayOfMonth();
+    Long ninetyDaysAgoAsLong = ninetyDaysAgo.getYear() * 10000L + ninetyDaysAgo.getMonth().getValue() * 100L + ninetyDaysAgo.getDayOfMonth();
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporation, ninetyDaysAgoAsLong, yesterdayAsLong);
   }
 }

@@ -3,12 +3,13 @@ package com.fetoxdevelopments.wormboard.repository;
 import java.util.List;
 
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
+import com.fetoxdevelopments.wormboard.domain.compositekeys.ZwbAggregateCorpId;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ZwbAggregateCorpRepository
-  extends CrudRepository<ZwbAggregateCorpJPA, Long>
+  extends CrudRepository<ZwbAggregateCorpJPA, ZwbAggregateCorpId>
 {
   @Query("SELECT zwbAggregateCorp"
          + " FROM ZwbAggregateCorpJPA zwbAggregateCorp"

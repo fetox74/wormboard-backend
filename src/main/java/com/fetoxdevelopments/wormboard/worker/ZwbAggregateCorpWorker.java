@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
@@ -183,5 +184,17 @@ public class ZwbAggregateCorpWorker
                      avgkillsperday[i] = days == 0 ? 0.0 : (double) kills[i] / (double) days;});
 
     return new ZwbHourlyAggregateCorpBean(kills, sumonkills, avgkillsperday, avgonkills);
+  }
+
+  public Set<Long> getActivePlayerIdsForCorpAndTimespan(String corporation, Long dateBegin, Long dateEnd)
+  {
+    Set<Long> result = new HashSet<>();
+    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporation, dateBegin, dateEnd);
+
+    for(ZwbAggregateCorpJPA aggregate : aggregates)
+    {
+      result.addAll(Arrays.stream(aggregate.getActive().split(",")).map(e -> Long.parseLong(e)).collect(Collectors.toSet()));
+    }
+    return result;
   }
 }

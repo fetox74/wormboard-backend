@@ -193,7 +193,7 @@ public class ZwbAggregateCorpWorker
 
     for(ZwbAggregateCorpJPA aggregate : aggregates)
     {
-      result.addAll(Arrays.stream(aggregate.getActive().split(",")).map(e -> Long.parseLong(e)).collect(Collectors.toSet()));
+      result.addAll(Arrays.stream(aggregate.getActive().split(",")).filter(e -> !e.isEmpty()).map(e -> Long.parseLong(e)).collect(Collectors.toSet()));
     }
     return result;
   }

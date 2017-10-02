@@ -6,5 +6,5 @@ public class ZwbAggregateCharId
   implements Serializable
 {
   long date;
-  String character;
+  long characterid;
 }

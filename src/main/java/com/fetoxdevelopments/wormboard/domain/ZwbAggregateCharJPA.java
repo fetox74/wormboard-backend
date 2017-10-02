@@ -19,6 +19,10 @@ public class ZwbAggregateCharJPA
   private long date;
 
   @Id
+  @Column(name = "\"characterid\"")
+  private long characterid;
+
+  @Basic
   @Column(name = "\"character\"")
   private String character;
 
@@ -46,6 +50,16 @@ public class ZwbAggregateCharJPA
   public void setDate(long date)
   {
     this.date = date;
+  }
+
+  public long getCharacterid()
+  {
+    return characterid;
+  }
+
+  public void setCharacterid(long characterid)
+  {
+    this.characterid = characterid;
   }
 
   public String getCharacter()

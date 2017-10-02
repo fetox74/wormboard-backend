@@ -20,7 +20,7 @@ public interface ZwbAggregateCharRepository
   @Query("SELECT zwbAggregateChar"
          + " FROM ZwbAggregateCharJPA zwbAggregateChar"
          + " WHERE date >= :dateBegin AND date <= :dateEnd"
-         + " AND character IN :characters")
-  List<ZwbAggregateCharJPA> findForCharsBetweenDates(@Param("characters") Set<String> characters, @Param("dateBegin") Long dateBegin,
+         + " AND characterid IN :characterids")
+  List<ZwbAggregateCharJPA> findForCharsBetweenDates(@Param("characterids") Set<Long> characterids, @Param("dateBegin") Long dateBegin,
                                                      @Param("dateEnd") Long dateEnd);
 }

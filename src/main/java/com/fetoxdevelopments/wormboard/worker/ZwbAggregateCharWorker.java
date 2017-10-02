@@ -35,52 +35,52 @@ public class ZwbAggregateCharWorker
   @Autowired
   private ZwbKnownCharacterWorker zwbKnownCharacterWorker;
 
-  public List<ZwbAggregateCharBean> getStatsForActivePLayersOfCorpInTimespan(String corporation, Long dateBegin, Long dateEnd)
+  public List<ZwbAggregateCharBean> getStatsForActivePLayersOfCorpInTimespan(Long corporationid, Long dateBegin, Long dateEnd)
   {
     List<ZwbAggregateCharBean> result = new ArrayList<>();
 
-    Map<String, Long> mapCharKills = new HashMap<>();
-    Map<String, Long> mapCharLosses = new HashMap<>();
-    Map<String, Double> mapCharIskwon = new HashMap<>();
-    Map<String, Double> mapCharIsklost = new HashMap<>();
+    Map<Long, String> mapCharName = new HashMap<>();
+    Map<Long, Long> mapCharKills = new HashMap<>();
+    Map<Long, Long> mapCharLosses = new HashMap<>();
+    Map<Long, Double> mapCharIskwon = new HashMap<>();
+    Map<Long, Double> mapCharIsklost = new HashMap<>();
 
-    Set<Long> activeCharsOfCorp = zwbAggregateCorpWorker.getActivePlayerIdsForCorpAndTimespan(corporation, dateBegin, dateEnd);
+    Set<Long> activeCharsOfCorp = zwbAggregateCorpWorker.getActivePlayerIdsForCorpAndTimespan(corporationid, dateBegin, dateEnd);
 
-    Map<String, String> characterIdLookup = zwbKnownCharacterWorker.getCharacterIdLookup(activeCharsOfCorp);
-
-    List<ZwbAggregateCharJPA> aggregates = zwbAggregateCharRepository.findForCharsBetweenDates(characterIdLookup.keySet(), dateBegin, dateEnd);
+    List<ZwbAggregateCharJPA> aggregates = zwbAggregateCharRepository.findForCharsBetweenDates(activeCharsOfCorp, dateBegin, dateEnd);
 
     for(ZwbAggregateCharJPA aggregate : aggregates)
     {
-      String character = aggregate.getCharacter();
-      if(mapCharKills.containsKey(character))
+      Long characterid = aggregate.getCharacterid();
+      if(mapCharKills.containsKey(characterid))
       {
-        mapCharKills.put(character, mapCharKills.get(character) + aggregate.getKills());
-        mapCharLosses.put(character, mapCharLosses.get(character) + aggregate.getLosses());
-        mapCharIskwon.put(character, mapCharIskwon.get(character) + aggregate.getIskwon());
-        mapCharIsklost.put(character, mapCharIsklost.get(character) + aggregate.getIsklost());
+        mapCharKills.put(characterid, mapCharKills.get(characterid) + aggregate.getKills());
+        mapCharLosses.put(characterid, mapCharLosses.get(characterid) + aggregate.getLosses());
+        mapCharIskwon.put(characterid, mapCharIskwon.get(characterid) + aggregate.getIskwon());
+        mapCharIsklost.put(characterid, mapCharIsklost.get(characterid) + aggregate.getIsklost());
       }
       else
       {
-        mapCharKills.put(character, aggregate.getKills());
-        mapCharLosses.put(character, aggregate.getLosses());
-        mapCharIskwon.put(character, aggregate.getIskwon());
-        mapCharIsklost.put(character, aggregate.getIsklost());
+        mapCharName.put(characterid, aggregate.getCharacter());
+        mapCharKills.put(characterid, aggregate.getKills());
+        mapCharLosses.put(characterid, aggregate.getLosses());
+        mapCharIskwon.put(characterid, aggregate.getIskwon());
+        mapCharIsklost.put(characterid, aggregate.getIsklost());
       }
     }
 
-    for(String character : mapCharKills.keySet())
+    for(Long characterid : mapCharKills.keySet())
     {
-      String portraitURL = "https://imageserver.eveonline.com/Character/" + characterIdLookup.get(character) + "_64.jpg";
-      long kills = mapCharKills.get(character);
-      long losses = mapCharLosses.get(character);
-      double iskwon = mapCharIskwon.get(character);
-      double isklost = mapCharIsklost.get(character);
+      String character = mapCharName.get(characterid);
+      long kills = mapCharKills.get(characterid);
+      long losses = mapCharLosses.get(characterid);
+      double iskwon = mapCharIskwon.get(characterid);
+      double isklost = mapCharIsklost.get(characterid);
       double netisk = iskwon - isklost;
       double kdratio = (double) kills / (double) losses;
       double kdefficiency = (1 - (double) losses / (double) (kills + losses)) * 100.0;
       double iskefficiency = (1 - isklost / (iskwon + isklost)) * 100.0;
-      result.add(new ZwbAggregateCharBean(character, portraitURL, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency));
+      result.add(new ZwbAggregateCharBean(characterid, character, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency));
     }
 
     return result;

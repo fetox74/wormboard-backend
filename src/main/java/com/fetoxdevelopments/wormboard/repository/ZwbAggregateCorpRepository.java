@@ -29,6 +29,6 @@ public interface ZwbAggregateCorpRepository
   @Query("SELECT zwbAggregateCorp"
          + " FROM ZwbAggregateCorpJPA zwbAggregateCorp"
          + " WHERE date >= :dateBegin AND date <= :dateEnd"
-         + " AND corporation = :corporation")
-  List<ZwbAggregateCorpJPA> findForCorpBetweenDates(@Param("corporation") String corporation, @Param("dateBegin") Long dateBegin, @Param("dateEnd") Long dateEnd);
+         + " AND corporationid = :corporationid")
+  List<ZwbAggregateCorpJPA> findForCorpBetweenDates(@Param("corporationid") Long corporationid, @Param("dateBegin") Long dateBegin, @Param("dateEnd") Long dateEnd);
 }

@@ -47,13 +47,14 @@ public class ZwbAggregateCorpWorker
   {
     List<ZwbAggregateCorpBean> result = new ArrayList<>();
 
-    Map<String, Long> mapCorpKills = new HashMap<>();
-    Map<String, Long> mapCorpLosses = new HashMap<>();
-    Map<String, Double> mapCorpIskwon = new HashMap<>();
-    Map<String, Double> mapCorpIsklost = new HashMap<>();
-    Map<String, Set<String>> mapCorpActive = new HashMap<>();
-    Map<String, Long> mapCorpNumActive = new HashMap<>();
-    Map<String, Long> mapCorpSumOnKills = new HashMap<>();
+    Map<Long, String> mapCorpName = new HashMap<>();
+    Map<Long, Long> mapCorpKills = new HashMap<>();
+    Map<Long, Long> mapCorpLosses = new HashMap<>();
+    Map<Long, Double> mapCorpIskwon = new HashMap<>();
+    Map<Long, Double> mapCorpIsklost = new HashMap<>();
+    Map<Long, Set<String>> mapCorpActive = new HashMap<>();
+    Map<Long, Long> mapCorpNumActive = new HashMap<>();
+    Map<Long, Long> mapCorpSumOnKills = new HashMap<>();
 
     Stopwatch dbStopwatch = Stopwatch.createStarted();
     List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findBetweenDates(dateBegin, dateEnd);
@@ -63,46 +64,48 @@ public class ZwbAggregateCorpWorker
     Stopwatch aggStopwatch = Stopwatch.createStarted();
     for(ZwbAggregateCorpJPA aggregate : aggregates)
     {
-      String corporation = aggregate.getCorporation();
-      if(mapCorpKills.containsKey(corporation))
+      Long corporationid = aggregate.getCorporationid();
+      if(mapCorpKills.containsKey(corporationid))
       {
-        mapCorpKills.put(corporation, mapCorpKills.get(corporation) + aggregate.getKills());
-        mapCorpLosses.put(corporation, mapCorpLosses.get(corporation) + aggregate.getLosses());
-        mapCorpIskwon.put(corporation, mapCorpIskwon.get(corporation) + aggregate.getIskwon());
-        mapCorpIsklost.put(corporation, mapCorpIsklost.get(corporation) + aggregate.getIsklost());
-        Set<String> active = mapCorpActive.get(corporation);
+        mapCorpKills.put(corporationid, mapCorpKills.get(corporationid) + aggregate.getKills());
+        mapCorpLosses.put(corporationid, mapCorpLosses.get(corporationid) + aggregate.getLosses());
+        mapCorpIskwon.put(corporationid, mapCorpIskwon.get(corporationid) + aggregate.getIskwon());
+        mapCorpIsklost.put(corporationid, mapCorpIsklost.get(corporationid) + aggregate.getIsklost());
+        Set<String> active = mapCorpActive.get(corporationid);
         active.addAll(new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
-        mapCorpNumActive.put(corporation, (long) active.size());
-        mapCorpSumOnKills.put(corporation, mapCorpSumOnKills.get(corporation) + aggregate.getSumonkills());
+        mapCorpNumActive.put(corporationid, (long) active.size());
+        mapCorpSumOnKills.put(corporationid, mapCorpSumOnKills.get(corporationid) + aggregate.getSumonkills());
       }
       else
       {
-        mapCorpKills.put(corporation, aggregate.getKills());
-        mapCorpLosses.put(corporation, aggregate.getLosses());
-        mapCorpIskwon.put(corporation, aggregate.getIskwon());
-        mapCorpIsklost.put(corporation, aggregate.getIsklost());
-        mapCorpActive.put(corporation, new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
-        mapCorpNumActive.put(corporation, aggregate.getNumactive());
-        mapCorpSumOnKills.put(corporation, aggregate.getSumonkills());
+        mapCorpName.put(corporationid, aggregate.getCorporation());
+        mapCorpKills.put(corporationid, aggregate.getKills());
+        mapCorpLosses.put(corporationid, aggregate.getLosses());
+        mapCorpIskwon.put(corporationid, aggregate.getIskwon());
+        mapCorpIsklost.put(corporationid, aggregate.getIsklost());
+        mapCorpActive.put(corporationid, new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
+        mapCorpNumActive.put(corporationid, aggregate.getNumactive());
+        mapCorpSumOnKills.put(corporationid, aggregate.getSumonkills());
       }
     }
 
-    for(String corporation : mapCorpKills.keySet())
+    for(Long corporationid : mapCorpKills.keySet())
     {
-      long numactive = mapCorpNumActive.get(corporation);
-      long kills = mapCorpKills.get(corporation);
-      long losses = mapCorpLosses.get(corporation);
-      double avgperkill = (double) mapCorpSumOnKills.get(corporation) / kills;
+      String corporation = mapCorpName.get(corporationid);
+      long numactive = mapCorpNumActive.get(corporationid);
+      long kills = mapCorpKills.get(corporationid);
+      long losses = mapCorpLosses.get(corporationid);
+      double avgperkill = (double) mapCorpSumOnKills.get(corporationid) / kills;
 
       if(numactive > 0 && avgperkill > 0.0 && !corporation.equals("Vigilant Tyrannos"))
       {
-        double iskwon = mapCorpIskwon.get(corporation);
-        double isklost = mapCorpIsklost.get(corporation);
+        double iskwon = mapCorpIskwon.get(corporationid);
+        double isklost = mapCorpIsklost.get(corporationid);
         double netisk = iskwon - isklost;
         double kdratio = (double) kills / (double) losses;
         double kdefficiency = (1 - (double) losses / (double) (kills + losses)) * 100.0;
         double iskefficiency = (1 - isklost / (iskwon + isklost)) * 100.0;
-        result.add(new ZwbAggregateCorpBean(corporation, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency, numactive, avgperkill,
+        result.add(new ZwbAggregateCorpBean(corporationid, corporation, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency, numactive, avgperkill,
                                         iskwon / (double) numactive, netisk / (double) numactive, iskwon / avgperkill, netisk / avgperkill));
       }
     }
@@ -114,7 +117,7 @@ public class ZwbAggregateCorpWorker
     return result;
   }
 
-  public ZwbHourlyAggregateCorpBean getHourlyStatsForCorpAndTimespan(String corporation, Long dateBegin, Long dateEnd)
+  public ZwbHourlyAggregateCorpBean getHourlyStatsForCorpAndTimespan(Long corporationid, Long dateBegin, Long dateEnd)
   {
     long[] kills = new long[24];
     long[] sumonkills = new long[24];
@@ -122,7 +125,7 @@ public class ZwbAggregateCorpWorker
     double[] avgonkills = new double[24];
     int daysCounted = 0;
 
-    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporation, dateBegin, dateEnd);
+    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporationid, dateBegin, dateEnd);
 
     for(ZwbAggregateCorpJPA aggregate : aggregates)
     {
@@ -186,10 +189,10 @@ public class ZwbAggregateCorpWorker
     return new ZwbHourlyAggregateCorpBean(kills, sumonkills, avgkillsperday, avgonkills);
   }
 
-  public Set<Long> getActivePlayerIdsForCorpAndTimespan(String corporation, Long dateBegin, Long dateEnd)
+  public Set<Long> getActivePlayerIdsForCorpAndTimespan(Long corporationid, Long dateBegin, Long dateEnd)
   {
     Set<Long> result = new HashSet<>();
-    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporation, dateBegin, dateEnd);
+    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporationid, dateBegin, dateEnd);
 
     for(ZwbAggregateCorpJPA aggregate : aggregates)
     {

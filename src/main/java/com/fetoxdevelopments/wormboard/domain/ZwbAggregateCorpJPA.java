@@ -19,6 +19,10 @@ public class ZwbAggregateCorpJPA
   private long date;
 
   @Id
+  @Column(name = "\"corporationid\"")
+  private long corporationid;
+
+  @Basic
   @Column(name = "\"corporation\"")
   private String corporation;
 
@@ -250,6 +254,16 @@ public class ZwbAggregateCorpJPA
   public void setDate(long date)
   {
     this.date = date;
+  }
+
+  public long getCorporationid()
+  {
+    return corporationid;
+  }
+
+  public void setCorporationid(long corporationid)
+  {
+    this.corporationid = corporationid;
   }
 
   public String getCorporation()

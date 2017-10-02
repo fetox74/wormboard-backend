@@ -6,5 +6,5 @@ public class ZwbAggregateCorpId
   implements Serializable
 {
   long date;
-  String corporation;
+  long corporationid;
 }

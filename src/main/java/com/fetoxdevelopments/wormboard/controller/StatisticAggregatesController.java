@@ -92,66 +92,66 @@ public class StatisticAggregatesController
   }
 
   @RequestMapping("/getHourlyCorpStatsForMonth")
-  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForMonth(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForMonth(@RequestParam(value = "corporationid") Long corporationid,
                                                                @RequestParam(value = "month", defaultValue = "") Long month)
   {
-    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, month * 100, month * 100 + 99);
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporationid, month * 100, month * 100 + 99);
   }
 
   @RequestMapping("/getHourlyCorpStatsForQuarter")
-  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForQuarter(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForQuarter(@RequestParam(value = "corporationid") Long corporationid,
                                                                  @RequestParam(value = "quarter", defaultValue = "") Long quarter)
   {
-    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, quarter * 100, (quarter + 2) * 100 + 99);
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporationid, quarter * 100, (quarter + 2) * 100 + 99);
   }
 
   @RequestMapping("/getHourlyCorpStatsForYear")
-  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForYear(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForYear(@RequestParam(value = "corporationid") Long corporationid,
                                                               @RequestParam(value = "year", defaultValue = "") Long year)
   {
-    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, year * 10000, year * 10000 + 9999);
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporationid, year * 10000, year * 10000 + 9999);
   }
 
   @RequestMapping("/getHourlyCorpStatsForLast90Days")
-  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForLast90Days(@RequestParam(value = "corporation", defaultValue = "") String corporation)
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForLast90Days(@RequestParam(value = "corporationid") Long corporationid)
   {
     LocalDate today = LocalDate.now();
     LocalDate yesterday = today.minusDays(1);
     LocalDate ninetyDaysAgo = today.minusDays(90);
     Long yesterdayAsLong = yesterday.getYear() * 10000L + yesterday.getMonth().getValue() * 100L + yesterday.getDayOfMonth();
     Long ninetyDaysAgoAsLong = ninetyDaysAgo.getYear() * 10000L + ninetyDaysAgo.getMonth().getValue() * 100L + ninetyDaysAgo.getDayOfMonth();
-    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporation, ninetyDaysAgoAsLong, yesterdayAsLong);
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporationid, ninetyDaysAgoAsLong, yesterdayAsLong);
   }
 
   @RequestMapping("/getCorpActivePlayerStatsForMonth")
-  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForMonth(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForMonth(@RequestParam(value = "corporationid") Long corporationid,
                                                                      @RequestParam(value = "month", defaultValue = "") Long month)
   {
-    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporation, month * 100, month * 100 + 99);
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporationid, month * 100, month * 100 + 99);
   }
 
   @RequestMapping("/getCorpActivePlayerStatsForQuarter")
-  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForQuarter(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForQuarter(@RequestParam(value = "corporationid") Long corporationid,
                                                                        @RequestParam(value = "quarter", defaultValue = "") Long quarter)
   {
-    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporation, quarter * 100, (quarter + 2) * 100 + 99);
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporationid, quarter * 100, (quarter + 2) * 100 + 99);
   }
 
   @RequestMapping("/getCorpActivePlayerStatsForYear")
-  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForYear(@RequestParam(value = "corporation", defaultValue = "") String corporation,
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForYear(@RequestParam(value = "corporationid") Long corporationid,
                                                                     @RequestParam(value = "year", defaultValue = "") Long year)
   {
-    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporation, year * 10000, year * 10000 + 9999);
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporationid, year * 10000, year * 10000 + 9999);
   }
 
   @RequestMapping("/getCorpActivePlayerStatsForLast90Days")
-  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForLast90Days(@RequestParam(value = "corporation", defaultValue = "") String corporation)
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForLast90Days(@RequestParam(value = "corporationid") Long corporationid)
   {
     LocalDate today = LocalDate.now();
     LocalDate yesterday = today.minusDays(1);
     LocalDate ninetyDaysAgo = today.minusDays(90);
     Long yesterdayAsLong = yesterday.getYear() * 10000L + yesterday.getMonth().getValue() * 100L + yesterday.getDayOfMonth();
     Long ninetyDaysAgoAsLong = ninetyDaysAgo.getYear() * 10000L + ninetyDaysAgo.getMonth().getValue() * 100L + ninetyDaysAgo.getDayOfMonth();
-    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporation, ninetyDaysAgoAsLong, yesterdayAsLong);
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporationid, ninetyDaysAgoAsLong, yesterdayAsLong);
   }
 }

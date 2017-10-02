@@ -81,34 +81,36 @@ def getFinalHitCorpAndUpdateAttackers(attackers, value):
         if "corporation" in attacker:
             knownCorporationDict[attacker["corporation"]["id"]] = attacker["corporation"]["name"]
         if "character" in attacker:
+            characterid = attacker["character"]["id"]
             character = attacker["character"]["name"]
-            knownCharacterDict[attacker["character"]["id"]] = character
-            updateCharacter(character, 1, 0, value, 0.0)
+            knownCharacterDict[characterid] = character
+            updateCharacter(characterid, character, 1, 0, value, 0.0)
+    for attacker in attackers:
         if attacker["finalBlow"]:
             if "corporation" in attacker:
-                return attacker["corporation"]["name"]
+                return attacker["corporation"]["id"], attacker["corporation"]["name"]
             else:
-                return ""
+                return -1, ""
 
 
-def getIskLossForCorp(corp):
-    if corp in lossDict:
-        return lossDict[corp]["isklost"]
+def getIskLossForCorp(corporationid):
+    if corporationid in lossDict:
+        return lossDict[corporationid]["isklost"]
     else:
         return 0.0
 
 
-def getLossesForCorp(corp):
-    if corp in lossDict:
-        return lossDict[corp]["losses"]
+def getLossesForCorp(corporationid):
+    if corporationid in lossDict:
+        return lossDict[corporationid]["losses"]
     else:
         return 0
 
 
-def getAttackersOfCorp(attackers, corporation):
+def getAttackersOfCorp(attackers, corporationid):
     result = set()
     for attacker in attackers:
-        if "corporation" in attacker and attacker["corporation"]["name"] == corporation and "character" in attacker:
+        if "corporation" in attacker and attacker["corporation"]["id"] == corporationid and "character" in attacker:
             result.add(attacker["character"]["id"])
     return result
 
@@ -125,42 +127,44 @@ def getHourDict():
     return result
 
 
-def updateCharacter(character, kills, losses, iskwon, isklost):
-    if character in characterDict:
-        characterDict[character]["kills"] = characterDict[character]["kills"] + kills
-        characterDict[character]["losses"] = characterDict[character]["losses"] + losses
-        characterDict[character]["iskwon"] = characterDict[character]["iskwon"] + iskwon
-        characterDict[character]["isklost"] = characterDict[character]["isklost"] + isklost
+def updateCharacter(characterid, character, kills, losses, iskwon, isklost):
+    if characterid in characterDict:
+        characterDict[characterid]["kills"] = characterDict[characterid]["kills"] + kills
+        characterDict[characterid]["losses"] = characterDict[characterid]["losses"] + losses
+        characterDict[characterid]["iskwon"] = characterDict[characterid]["iskwon"] + iskwon
+        characterDict[characterid]["isklost"] = characterDict[characterid]["isklost"] + isklost
     else:
-        characterDict[character] = {"kills": kills, "losses": losses, "iskwon": iskwon, "isklost": isklost}
+        characterDict[characterid] = {"character": character, "kills": kills, "losses": losses, "iskwon": iskwon, "isklost": isklost}
 
 
 def updateDictionaries(killmailCREST, killmailZKB):
     if killmailZKB:
-        finalHitCorp = getFinalHitCorpAndUpdateAttackers(killmailCREST["attackers"], killmailZKB["zkb"]["totalValue"])
+        finalHitCorpId, finalHitCorp = getFinalHitCorpAndUpdateAttackers(killmailCREST["attackers"], killmailZKB["zkb"]["totalValue"])
+        victimCorpId = killmailCREST["victim"]["corporation"]["id"]
         victimCorp = killmailCREST["victim"]["corporation"]["name"]
-        knownCorporationDict[killmailCREST["victim"]["corporation"]["id"]] = victimCorp
+        knownCorporationDict[finalHitCorpId] = victimCorp
         if "character" in killmailCREST["victim"]:
+            characterid = killmailCREST["victim"]["character"]["id"]
             character = killmailCREST["victim"]["character"]["name"]
-            knownCharacterDict[killmailCREST["victim"]["character"]["id"]] = character
-            updateCharacter(character, 0, 1, 0.0, killmailZKB["zkb"]["totalValue"])
-        if finalHitCorp != "":
-            attackersOfFinalHitCorp = getAttackersOfCorp(killmailCREST["attackers"], finalHitCorp)
-            if finalHitCorp in masterDict:
-                masterDict[finalHitCorp]["kills"] = masterDict[finalHitCorp]["kills"] + 1
-                masterDict[finalHitCorp]["iskwon"] = masterDict[finalHitCorp]["iskwon"] + killmailZKB["zkb"]["totalValue"]
-                masterDict[finalHitCorp]["active"] = masterDict[finalHitCorp]["active"] | attackersOfFinalHitCorp
-                masterDict[finalHitCorp]["sumonkills"] = masterDict[finalHitCorp]["sumonkills"] + len(attackersOfFinalHitCorp)
+            knownCharacterDict[characterid] = character
+            updateCharacter(characterid, character, 0, 1, 0.0, killmailZKB["zkb"]["totalValue"])
+        if finalHitCorpId != -1:
+            attackersOfFinalHitCorp = getAttackersOfCorp(killmailCREST["attackers"], finalHitCorpId)
+            if finalHitCorpId in masterDict:
+                masterDict[finalHitCorpId]["kills"] = masterDict[finalHitCorpId]["kills"] + 1
+                masterDict[finalHitCorpId]["iskwon"] = masterDict[finalHitCorpId]["iskwon"] + killmailZKB["zkb"]["totalValue"]
+                masterDict[finalHitCorpId]["active"] = masterDict[finalHitCorpId]["active"] | attackersOfFinalHitCorp
+                masterDict[finalHitCorpId]["sumonkills"] = masterDict[finalHitCorpId]["sumonkills"] + len(attackersOfFinalHitCorp)
             else:
-                masterDict[finalHitCorp] = {"kills": 1, "iskwon": killmailZKB["zkb"]["totalValue"], "active": attackersOfFinalHitCorp,
-                                            "sumonkills": len(attackersOfFinalHitCorp), "killsinhour": getHourDict(), "sumonkillsinhour": getHourDict()}
-            addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorp]["killsinhour"], 1)
-            addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorp]["sumonkillsinhour"], len(attackersOfFinalHitCorp))
-        if victimCorp in lossDict:
-            lossDict[victimCorp]["losses"] = lossDict[victimCorp]["losses"] + 1
-            lossDict[victimCorp]["isklost"] = lossDict[victimCorp]["isklost"] + killmailZKB["zkb"]["totalValue"]
+                masterDict[finalHitCorpId] = {"corporation": finalHitCorp, "kills": 1, "iskwon": killmailZKB["zkb"]["totalValue"], "active": attackersOfFinalHitCorp,
+                                              "sumonkills": len(attackersOfFinalHitCorp), "killsinhour": getHourDict(), "sumonkillsinhour": getHourDict()}
+            addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorpId]["killsinhour"], 1)
+            addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorpId]["sumonkillsinhour"], len(attackersOfFinalHitCorp))
+        if victimCorpId in lossDict:
+            lossDict[victimCorpId]["losses"] = lossDict[victimCorpId]["losses"] + 1
+            lossDict[victimCorpId]["isklost"] = lossDict[victimCorpId]["isklost"] + killmailZKB["zkb"]["totalValue"]
         else:
-            lossDict[victimCorp] = {"losses": 1, "isklost": killmailZKB["zkb"]["totalValue"]}
+            lossDict[victimCorpId] = {"losses": 1, "isklost": killmailZKB["zkb"]["totalValue"]}
     else:
         print "kill id " + killmailCREST["killID_str"] + " seems not to exist on zKillboard.."
 
@@ -175,9 +179,10 @@ def queryAggregateAlreadyInDB(cur, date, corp):
 
 def updateDB(cur, date):
     cur.execute('DELETE FROM "zwbAggregateCorp" WHERE "date" = %i' % int(date))
+    cur.execute('DELETE FROM "zwbAggregateChar" WHERE "date" = %i' % int(date))
     for key, value in masterDict.items():
         cur.execute(
-            '''INSERT INTO "zwbAggregateCorp" ("date", "corporation", "kills", "losses", "iskwon", "isklost", "active", "numactive", "sumonkills", 
+            '''INSERT INTO "zwbAggregateCorp" ("date", "corporationid", "corporation", "kills", "losses", "iskwon", "isklost", "active", "numactive", "sumonkills", 
             "killsinhour00", "killsinhour01", "killsinhour02", "killsinhour03", "killsinhour04", "killsinhour05", "killsinhour06", "killsinhour07", 
             "killsinhour08", "killsinhour09", "killsinhour10", "killsinhour11", "killsinhour12", "killsinhour13", "killsinhour14", "killsinhour15", 
             "killsinhour16", "killsinhour17", "killsinhour18", "killsinhour19", "killsinhour20", "killsinhour21", "killsinhour22", "killsinhour23", 
@@ -185,11 +190,12 @@ def updateDB(cur, date):
             "sumonkillsinhour06", "sumonkillsinhour07", "sumonkillsinhour08", "sumonkillsinhour09", "sumonkillsinhour10", "sumonkillsinhour11", 
             "sumonkillsinhour12", "sumonkillsinhour13", "sumonkillsinhour14", "sumonkillsinhour15", "sumonkillsinhour16", "sumonkillsinhour17", 
             "sumonkillsinhour18", "sumonkillsinhour19", "sumonkillsinhour20", "sumonkillsinhour21", "sumonkillsinhour22", "sumonkillsinhour23") 
-            VALUES (%i, %s, %i, %i, %f, %f, %s, %i, %i, 
+            VALUES (%i, %i, %s, %i, %i, %f, %f, %s, %i, %i, 
             %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, 
             %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i)''' % (
             int(date),
-            "'" + key.replace("'", "''") + "'",
+            key,
+            "'" + value["corporation"].replace("'", "''") + "'",
             value["kills"],
             getLossesForCorp(key),
             value["iskwon"],
@@ -255,14 +261,14 @@ def updateDB(cur, date):
                     (key, "'" + value.replace("'", "''") + "'", key))
 
     for key, value in characterDict.items():
-        cur.execute('INSERT INTO "zwbAggregateChar" ("date", "character", "kills", "losses", "iskwon", "isklost") VALUES (%i, %s, %i, %i, %f, %f)' %
-                    (int(date), "'" + key.replace("'", "''") + "'", value["kills"], value["losses"], value["iskwon"], value["isklost"]))
+        cur.execute('INSERT INTO "zwbAggregateChar" ("date", "characterid", "character", "kills", "losses", "iskwon", "isklost") VALUES (%i, %i, %s, %i, %i, %f, %f)' %
+                    (int(date), key, "'" + value["character"].replace("'", "''") + "'", value["kills"], value["losses"], value["iskwon"], value["isklost"]))
     conn.commit()
 
 
-#DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110"]
+DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110"]
 #DATES = ["20170111", "20170112", "20170113", "20170114", "20170115", "20170116", "20170117", "20170118", "20170119", "20170120"]
-DATES = ["20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131"]
+#DATES = ["20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131"]
 reJMail = re.compile("J[0-9]{6}")
 
 try:

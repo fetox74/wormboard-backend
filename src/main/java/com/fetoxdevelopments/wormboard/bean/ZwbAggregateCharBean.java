@@ -2,9 +2,9 @@ package com.fetoxdevelopments.wormboard.bean;
 
 public class ZwbAggregateCharBean
 {
-  private String character;
+  private long characterid;
 
-  private String portraiturl;
+  private String character;
 
   private long kills;
 
@@ -22,11 +22,11 @@ public class ZwbAggregateCharBean
 
   private double iskefficiency;
 
-  public ZwbAggregateCharBean(String character, String portraiturl, long kills, long losses, double kdratio, double kdefficiency, double iskwon, double isklost,
+  public ZwbAggregateCharBean(long characterid, String character, long kills, long losses, double kdratio, double kdefficiency, double iskwon, double isklost,
                               double netisk, double iskefficiency)
   {
+    this.characterid = characterid;
     this.character = character;
-    this.portraiturl = portraiturl;
     this.kills = kills;
     this.losses = losses;
     this.kdratio = kdratio;
@@ -37,6 +37,16 @@ public class ZwbAggregateCharBean
     this.iskefficiency = iskefficiency;
   }
 
+  public long getCharacterid()
+  {
+    return characterid;
+  }
+
+  public void setCharacterid(long characterid)
+  {
+    this.characterid = characterid;
+  }
+
   public String getCharacter()
   {
     return character;
@@ -45,16 +55,6 @@ public class ZwbAggregateCharBean
   public void setCharacter(String character)
   {
     this.character = character;
-  }
-
-  public String getPortraiturl()
-  {
-    return portraiturl;
-  }
-
-  public void setPortraiturl(String portraiturl)
-  {
-    this.portraiturl = portraiturl;
   }
 
   public long getKills()

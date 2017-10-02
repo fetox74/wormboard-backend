@@ -2,6 +2,8 @@ package com.fetoxdevelopments.wormboard.bean;
 
 public class ZwbAggregateCorpBean
 {
+  private long corporationid;
+
   private String corporation;
 
   private long kills;
@@ -32,10 +34,11 @@ public class ZwbAggregateCorpBean
 
   private double netiskperavgonkill;
 
-  public ZwbAggregateCorpBean(String corporation, long kills, long losses, double kdratio, double kdefficiency, double iskwon, double isklost, double netisk,
+  public ZwbAggregateCorpBean(long corporationid, String corporation, long kills, long losses, double kdratio, double kdefficiency, double iskwon, double isklost, double netisk,
                               double iskefficiency, long numactive, double avgperkill, double iskperactive, double netiskperactive, double iskperavgonkill,
                               double netiskperavgonkill)
   {
+    this.corporationid = corporationid;
     this.corporation = corporation;
     this.kills = kills;
     this.losses = losses;
@@ -51,6 +54,16 @@ public class ZwbAggregateCorpBean
     this.netiskperactive = netiskperactive;
     this.iskperavgonkill = iskperavgonkill;
     this.netiskperavgonkill = netiskperavgonkill;
+  }
+
+  public long getCorporationid()
+  {
+    return corporationid;
+  }
+
+  public void setCorporationid(long corporationid)
+  {
+    this.corporationid = corporationid;
   }
 
   public String getCorporation()

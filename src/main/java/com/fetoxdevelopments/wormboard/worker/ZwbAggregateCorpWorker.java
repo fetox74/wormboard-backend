@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
+import com.fetoxdevelopments.wormboard.bean.ZwbHistoryCorpBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbHourlyAggregateCorpBean;
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
 import com.fetoxdevelopments.wormboard.repository.ZwbAggregateCorpRepository;
@@ -199,5 +200,101 @@ public class ZwbAggregateCorpWorker
       result.addAll(Arrays.stream(aggregate.getActive().split(",")).filter(e -> !e.isEmpty()).map(e -> Long.parseLong(e)).collect(Collectors.toSet()));
     }
     return result;
+  }
+
+  public ZwbHistoryCorpBean getHistoryOfCorpInTimespan(Long corporationid, Long dateBegin, Long dateEnd)
+  {
+    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporationid, dateBegin, dateEnd);
+
+    if(dateBegin / 10000L == dateEnd / 10000L)
+    {
+      if(dateBegin % 10000L == 0L && dateEnd % 10000L == 9999)
+      {
+        int numElems = 24;
+
+        long[] kills = new long[numElems];
+        long[] losses = new long[numElems];
+        double[] kdratio = new double[numElems];
+        double[] kdefficiency = new double[numElems];
+        double[] iskwon = new double[numElems];
+        double[] isklost = new double[numElems];
+        double[] netisk = new double[numElems];
+        double[] iskefficiency = new double[numElems];
+        double[] avgperkill = new double[numElems];
+        double[] iskperactive = new double[numElems];
+        double[] netiskperactive = new double[numElems];
+        double[] iskperavgonkill = new double[numElems];
+        double[] netiskperavgonkill = new double[numElems];
+
+        Set<String>[] active = new HashSet[numElems];
+
+        for(int i = 0; i < numElems; i++)
+        {
+          active[i] = new HashSet<>();
+        }
+
+        int maxIndex = 0;
+
+        for(ZwbAggregateCorpJPA aggregate : aggregates)
+        {
+          long date = aggregate.getDate();
+          int month = (int)((date - (date / 10000L) * 10000L) / 100L);
+          int index = (month - 1) * 2 + (date % 100L > 15 ? 1 : 0);
+
+          if(index > maxIndex) maxIndex = index;
+
+          kills[index] += aggregate.getKills();
+          losses[index] -= aggregate.getLosses();
+          iskwon[index] += aggregate.getIskwon();
+          isklost[index] -= aggregate.getIsklost();
+
+          active[index].addAll(new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
+        }
+
+        long[] killsTrunc = new long[maxIndex + 1];
+        long[] lossesTrunc = new long[maxIndex + 1];
+        double[] kdratioTrunc = new double[maxIndex + 1];
+        double[] kdefficiencyTrunc = new double[maxIndex + 1];
+        double[] iskwonTrunc = new double[maxIndex + 1];
+        double[] isklostTrunc = new double[maxIndex + 1];
+        double[] netiskTrunc = new double[maxIndex + 1];
+        double[] iskefficiencyTrunc = new double[maxIndex + 1];
+        long[] numactiveTrunc = new long[maxIndex + 1];
+        double[] avgperkillTrunc = new double[maxIndex + 1];
+        double[] iskperactiveTrunc = new double[maxIndex + 1];
+        double[] netiskperactiveTrunc = new double[maxIndex + 1];
+        double[] iskperavgonkillTrunc = new double[maxIndex + 1];
+        double[] netiskperavgonkillTrunc = new double[maxIndex + 1];
+
+        for(int i = 0; i <= maxIndex; i++)
+        {
+          killsTrunc[i] = kills[i];
+          lossesTrunc[i] = losses[i];
+          kdratioTrunc[i] = kdratio[i];
+          kdefficiencyTrunc[i] = kdefficiency[i];
+          iskwonTrunc[i] = iskwon[i];
+          isklostTrunc[i] = isklost[i];
+          netiskTrunc[i] = netisk[i];
+          iskefficiencyTrunc[i] = iskefficiency[i];
+          numactiveTrunc[i] = active[i].size();
+          avgperkillTrunc[i] = avgperkill[i];
+          iskperactiveTrunc[i] = iskperactive[i];
+          netiskperactiveTrunc[i] = netiskperactive[i];
+          iskperavgonkillTrunc[i] = iskperavgonkill[i];
+          netiskperavgonkillTrunc[i] = netiskperavgonkill[i];
+        }
+
+        return new ZwbHistoryCorpBean(killsTrunc, lossesTrunc, kdratioTrunc, kdefficiencyTrunc, iskwonTrunc, isklostTrunc, netiskTrunc, iskefficiencyTrunc,
+                                      numactiveTrunc, avgperkillTrunc, iskperactiveTrunc, netiskperactiveTrunc, iskperavgonkillTrunc, netiskperavgonkillTrunc);
+      }
+      else
+      {
+        return null;
+      }
+    }
+    else
+    {
+      return null;
+    }
   }
 }

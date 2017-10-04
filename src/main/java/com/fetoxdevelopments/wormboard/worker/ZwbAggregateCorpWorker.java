@@ -245,8 +245,8 @@ public class ZwbAggregateCorpWorker
 
           kills[index] += aggregate.getKills();
           losses[index] -= aggregate.getLosses();
-          iskwon[index] += aggregate.getIskwon();
-          isklost[index] -= aggregate.getIsklost();
+          iskwon[index] += aggregate.getIskwon() / 1000000000.0;
+          isklost[index] -= aggregate.getIsklost() / 1000000000.0;
 
           active[index].addAll(new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
         }
@@ -274,7 +274,7 @@ public class ZwbAggregateCorpWorker
           kdefficiencyTrunc[i] = kdefficiency[i];
           iskwonTrunc[i] = iskwon[i];
           isklostTrunc[i] = isklost[i];
-          netiskTrunc[i] = netisk[i];
+          netiskTrunc[i] = iskwon[i] + isklost[i];
           iskefficiencyTrunc[i] = iskefficiency[i];
           numactiveTrunc[i] = active[i].size();
           avgperkillTrunc[i] = avgperkill[i];

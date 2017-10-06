@@ -53,25 +53,58 @@ def getCREST(tupleIdHash):
     return json.loads(data)
 
 
-def getZKB(id):
-    request = urllib2.Request("https://zkillboard.com/api/killID/" + id + "/")
-    request.add_header("Accept-encoding", "gzip")
-    request.add_header("Cache-Control", "1")
-    try:
-        response = urllib2.urlopen(request)
-    except urllib2.HTTPError as err:
-        print err.headers
-        return None
-    if response.info().get("Content-Encoding") == "gzip":
-        buf = StringIO(response.read())
-        f = gzip.GzipFile(fileobj=buf)
-        data = f.read()
-    else:
-        data = response.read()
+# def getZKB(id):
+#     request = urllib2.Request("https://zkillboard.com/api/killID/" + id + "/")
+#     request.add_header("Accept-encoding", "gzip")
+#     request.add_header("Cache-Control", "1")
+#     try:
+#         response = urllib2.urlopen(request)
+#     except urllib2.HTTPError as err:
+#         print err.headers
+#         return None
+#     if response.info().get("Content-Encoding") == "gzip":
+#         buf = StringIO(response.read())
+#         f = gzip.GzipFile(fileobj=buf)
+#         data = f.read()
+#     else:
+#         data = response.read()
+#
+#     result = json.loads(data)
+#     if len(result) > 0:
+#         return result[0]
+#     else:
+#         return None
 
-    result = json.loads(data)
-    if len(result) > 0:
-        return result[0]
+
+def getZKB(id, solarSystemId):
+    if id in mapIdKillmail:
+        return mapIdKillmail[id]
+
+    for page in range(1, 11):
+        request = urllib2.Request("https://zkillboard.com/api/no-items/no-attackers/solarSystemID/" + str(solarSystemId) + "/startTime/" + str(date) + "0000/endTime/" + str(date) + "2400/page/" + str(page) + "/")
+        request.add_header("Accept-encoding", "gzip")
+        request.add_header("Cache-Control", "1")
+        try:
+            response = urllib2.urlopen(request)
+        except urllib2.HTTPError as err:
+            print err.headers
+            return None
+        if response.info().get("Content-Encoding") == "gzip":
+            buf = StringIO(response.read())
+            f = gzip.GzipFile(fileobj=buf)
+            data = f.read()
+        else:
+            data = response.read()
+
+        killmails = json.loads(data)
+        if len(killmails) > 0:
+            for killmail in killmails:
+                mapIdKillmail[killmail["killmail_id"]] = killmail["zkb"]
+        else:
+            break
+
+    if id in mapIdKillmail:
+        return mapIdKillmail[id]
     else:
         return None
 
@@ -139,7 +172,7 @@ def updateCharacter(characterid, character, kills, losses, iskwon, isklost):
 
 def updateDictionaries(killmailCREST, killmailZKB):
     if killmailZKB:
-        finalHitCorpId, finalHitCorp = getFinalHitCorpAndUpdateAttackers(killmailCREST["attackers"], killmailZKB["zkb"]["totalValue"])
+        finalHitCorpId, finalHitCorp = getFinalHitCorpAndUpdateAttackers(killmailCREST["attackers"], killmailZKB["totalValue"])
         victimCorpId = killmailCREST["victim"]["corporation"]["id"]
         victimCorp = killmailCREST["victim"]["corporation"]["name"]
         knownCorporationDict[finalHitCorpId] = victimCorp
@@ -147,24 +180,24 @@ def updateDictionaries(killmailCREST, killmailZKB):
             characterid = killmailCREST["victim"]["character"]["id"]
             character = killmailCREST["victim"]["character"]["name"]
             knownCharacterDict[characterid] = character
-            updateCharacter(characterid, character, 0, 1, 0.0, killmailZKB["zkb"]["totalValue"])
+            updateCharacter(characterid, character, 0, 1, 0.0, killmailZKB["totalValue"])
         if finalHitCorpId != -1:
             attackersOfFinalHitCorp = getAttackersOfCorp(killmailCREST["attackers"], finalHitCorpId)
             if finalHitCorpId in masterDict:
                 masterDict[finalHitCorpId]["kills"] = masterDict[finalHitCorpId]["kills"] + 1
-                masterDict[finalHitCorpId]["iskwon"] = masterDict[finalHitCorpId]["iskwon"] + killmailZKB["zkb"]["totalValue"]
+                masterDict[finalHitCorpId]["iskwon"] = masterDict[finalHitCorpId]["iskwon"] + killmailZKB["totalValue"]
                 masterDict[finalHitCorpId]["active"] = masterDict[finalHitCorpId]["active"] | attackersOfFinalHitCorp
                 masterDict[finalHitCorpId]["sumonkills"] = masterDict[finalHitCorpId]["sumonkills"] + len(attackersOfFinalHitCorp)
             else:
-                masterDict[finalHitCorpId] = {"corporation": finalHitCorp, "kills": 1, "iskwon": killmailZKB["zkb"]["totalValue"], "active": attackersOfFinalHitCorp,
+                masterDict[finalHitCorpId] = {"corporation": finalHitCorp, "kills": 1, "iskwon": killmailZKB["totalValue"], "active": attackersOfFinalHitCorp,
                                               "sumonkills": len(attackersOfFinalHitCorp), "killsinhour": getHourDict(), "sumonkillsinhour": getHourDict()}
             addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorpId]["killsinhour"], 1)
             addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorpId]["sumonkillsinhour"], len(attackersOfFinalHitCorp))
         if victimCorpId in lossDict:
             lossDict[victimCorpId]["losses"] = lossDict[victimCorpId]["losses"] + 1
-            lossDict[victimCorpId]["isklost"] = lossDict[victimCorpId]["isklost"] + killmailZKB["zkb"]["totalValue"]
+            lossDict[victimCorpId]["isklost"] = lossDict[victimCorpId]["isklost"] + killmailZKB["totalValue"]
         else:
-            lossDict[victimCorpId] = {"losses": 1, "isklost": killmailZKB["zkb"]["totalValue"]}
+            lossDict[victimCorpId] = {"losses": 1, "isklost": killmailZKB["totalValue"]}
     else:
         print "kill id " + killmailCREST["killID_str"] + " seems not to exist on zKillboard.."
 
@@ -266,7 +299,7 @@ def updateDB(cur, date):
     conn.commit()
 
 
-DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110"]
+DATES = ["20170502", "20170503", "20170504", "20170505", "20170506", "20170507", "20170508", "20170509", "20170510", "20170511"]
 #DATES = ["20170111", "20170112", "20170113", "20170114", "20170115", "20170116", "20170117", "20170118", "20170119", "20170120"]
 #DATES = ["20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131"]
 reJMail = re.compile("J[0-9]{6}")
@@ -287,6 +320,7 @@ for date in DATES:
     lossDict = {}
     knownCharacterDict = {}
     knownCorporationDict = {}
+    mapIdKillmail = {}
 
     print "processing " + date
     chunks = partition(dictKillmailIdHash)
@@ -298,7 +332,7 @@ for date in DATES:
 
         for killmailCREST in results:
             if killmailCREST != [] and (reJMail.match(killmailCREST["solarSystem"]["name"]) or killmailCREST["solarSystem"]["name"] == "J1226-0"):
-                updateDictionaries(killmailCREST, getZKB(killmailCREST["killID_str"]))
+                updateDictionaries(killmailCREST, getZKB(killmailCREST["killID"], killmailCREST["solarSystem"]["id"]))
                 jMailCounter += 1
             elif not killmailCREST:  # 20160824 has the problematic first Keepstar kill that does not appear on CREST, this (and the above killmailCREST != []) is a temporary fix..
                 print("[] error...")

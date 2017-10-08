@@ -16,7 +16,7 @@ public class ZwbKnownCharacterWorker
   @Autowired
   private ZwbKnownCharacterRepository zwbKnownCharacterRepository;
 
-  Map<String, String> getCharacterIdLookup(Set<Long> ids)
+  public Map<String, String> getCharacterIdLookup(Set<Long> ids)
   {
     Set<ZwbKnownCharacterJPA> knownCharacterJPAS = zwbKnownCharacterRepository.findByCharacterIds(ids);
 

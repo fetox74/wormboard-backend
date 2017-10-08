@@ -23,7 +23,7 @@ def getKillmailHashes(date):
     try:
         response = urllib2.urlopen(request)
     except urllib2.HTTPError as err:
-        print err.headers
+        print err
         return []
     if response.info().get("Content-Encoding") == "gzip":
         buf = StringIO(response.read())
@@ -42,7 +42,7 @@ def getCREST(tupleIdHash):
     try:
         response = urllib2.urlopen(request)
     except urllib2.HTTPError as err:
-        print err.headers
+        print err
         return []
     if response.info().get("Content-Encoding") == "gzip":
         buf = StringIO(response.read())
@@ -60,7 +60,7 @@ def getCREST(tupleIdHash):
 #     try:
 #         response = urllib2.urlopen(request)
 #     except urllib2.HTTPError as err:
-#         print err.headers
+#         print err
 #         return None
 #     if response.info().get("Content-Encoding") == "gzip":
 #         buf = StringIO(response.read())
@@ -87,7 +87,7 @@ def getZKB(id, solarSystemId):
         try:
             response = urllib2.urlopen(request)
         except urllib2.HTTPError as err:
-            print err.headers
+            print err
             return None
         if response.info().get("Content-Encoding") == "gzip":
             buf = StringIO(response.read())
@@ -299,7 +299,7 @@ def updateDB(cur, date):
     conn.commit()
 
 
-DATES = ["20170502", "20170503", "20170504", "20170505", "20170506", "20170507", "20170508", "20170509", "20170510", "20170511"]
+DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110"]
 #DATES = ["20170111", "20170112", "20170113", "20170114", "20170115", "20170116", "20170117", "20170118", "20170119", "20170120"]
 #DATES = ["20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131"]
 reJMail = re.compile("J[0-9]{6}")
@@ -331,7 +331,7 @@ for date in DATES:
         pool.join()
 
         for killmailCREST in results:
-            if killmailCREST != [] and (reJMail.match(killmailCREST["solarSystem"]["name"]) or killmailCREST["solarSystem"]["name"] == "J1226-0"):
+            if killmailCREST != [] and (reJMail.match(killmailCREST["solarSystem"]["name"] or killmailCREST["solarSystem"]["name"] == "J1226-0")):
                 updateDictionaries(killmailCREST, getZKB(killmailCREST["killID"], killmailCREST["solarSystem"]["id"]))
                 jMailCounter += 1
             elif not killmailCREST:  # 20160824 has the problematic first Keepstar kill that does not appear on CREST, this (and the above killmailCREST != []) is a temporary fix..

@@ -15,6 +15,7 @@ import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
 import com.fetoxdevelopments.wormboard.status.ResponseTime;
 import com.fetoxdevelopments.wormboard.worker.ZwbAggregateCharWorker;
 import com.fetoxdevelopments.wormboard.worker.ZwbAggregateCorpWorker;
+import com.fetoxdevelopments.wormboard.worker.ZwbKnownCorporationWorker;
 import com.google.common.base.Joiner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class StatisticAggregatesController
 {
+  @Autowired
+  private ZwbKnownCorporationWorker zwbKnownCorporationWorker;
+
   @Autowired
   private ZwbAggregateCorpWorker zwbAggregateCorpWorker;
 
@@ -61,6 +65,12 @@ public class StatisticAggregatesController
                 " ms, øagg: " + String.format("%.2f", responseTime.getAggMillis()) + " ms";
 
     return new ServerStatusBean(new ArrayList<>(allMonth), statusMsg);
+  }
+
+  @RequestMapping("/getAllKnownCorporations")
+  public Set<String> getAllKnownCorporations()
+  {
+    return zwbKnownCorporationWorker.getAllKnownCorporationNames();
   }
 
   @RequestMapping("/getStatsForMonth")

@@ -44,6 +44,11 @@ public class ZwbAggregateCorpWorker
     return zwbAggregateCorpRepository.findAllDates();
   }
 
+  public Set<String> getAllKnownCorporationNames()
+  {
+    return zwbAggregateCorpRepository.findAllCorporationNames();
+  }
+
   public List<ZwbAggregateCorpBean> getStatsForTimespan(Long dateBegin, Long dateEnd)
   {
     List<ZwbAggregateCorpBean> result = new ArrayList<>();

@@ -1,6 +1,7 @@
 package com.fetoxdevelopments.wormboard.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
 import com.fetoxdevelopments.wormboard.domain.compositekeys.ZwbAggregateCorpId;
@@ -11,6 +12,10 @@ import org.springframework.data.repository.query.Param;
 public interface ZwbAggregateCorpRepository
   extends CrudRepository<ZwbAggregateCorpJPA, ZwbAggregateCorpId>
 {
+  @Query("SELECT DISTINCT zwbAggregateCorp.corporation"
+         + " FROM ZwbAggregateCorpJPA zwbAggregateCorp")
+  Set<String> findAllCorporationNames();
+
   @Query("SELECT zwbAggregateCorp"
          + " FROM ZwbAggregateCorpJPA zwbAggregateCorp"
          + " WHERE date = :date")

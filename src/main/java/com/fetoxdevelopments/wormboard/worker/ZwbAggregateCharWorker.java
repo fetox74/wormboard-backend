@@ -32,9 +32,6 @@ public class ZwbAggregateCharWorker
   @Autowired
   private ZwbAggregateCorpWorker zwbAggregateCorpWorker;
 
-  @Autowired
-  private ZwbKnownCharacterWorker zwbKnownCharacterWorker;
-
   public List<ZwbAggregateCharBean> getStatsForActivePLayersOfCorpInTimespan(Long corporationid, Long dateBegin, Long dateEnd)
   {
     List<ZwbAggregateCharBean> result = new ArrayList<>();

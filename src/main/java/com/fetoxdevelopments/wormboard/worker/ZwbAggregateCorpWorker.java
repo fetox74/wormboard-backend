@@ -3,17 +3,14 @@ package com.fetoxdevelopments.wormboard.worker;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
-import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpStub;
 import com.fetoxdevelopments.wormboard.bean.ZwbHistoryCorpBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbHourlyAggregateCorpBean;
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
@@ -24,6 +21,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ZwbAggregateCorpWorker
@@ -36,21 +34,25 @@ public class ZwbAggregateCorpWorker
   @Autowired
   private ResponseTime responseTime;
 
+  @Transactional
   public List<ZwbAggregateCorpJPA> getRawStatsForDay(Long date)
   {
     return zwbAggregateCorpRepository.findByDate(date);
   }
 
+  @Transactional
   public List<Long> getAllDates()
   {
     return zwbAggregateCorpRepository.findAllDates();
   }
 
+  @Transactional
   public Set<String> getAllKnownCorporationNames()
   {
     return zwbAggregateCorpRepository.findAllCorporationNames();
   }
 
+  @Transactional
   public List<ZwbAggregateCorpBean> getStatsForTimespan(Long dateBegin, Long dateEnd)
   {
     List<ZwbAggregateCorpBean> result = new ArrayList<>();
@@ -79,18 +81,20 @@ public class ZwbAggregateCorpWorker
         double kdratio = (double) kills / (double) losses;
         double kdefficiency = (1 - (double) losses / (double) (kills + losses)) * 100.0;
         double iskefficiency = (1 - isklost / (iskwon + isklost)) * 100.0;
-        result.add(new ZwbAggregateCorpBean(corporationid, corporation, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency, numactive, avgperkill,
-                                        iskwon / (double) numactive, netisk / (double) numactive, iskwon / avgperkill, netisk / avgperkill));
+        result.add(new ZwbAggregateCorpBean(corporationid, corporation, kills, losses, kdratio, kdefficiency, iskwon, isklost, netisk, iskefficiency, numactive,
+                                            avgperkill,
+                                            iskwon / (double) numactive, netisk / (double) numactive, iskwon / avgperkill, netisk / avgperkill));
       }
     }
     aggStopwatch.stop();
     LOG.info("Aggregated in " + aggStopwatch.toString());
 
-    responseTime.addNewRequest((double)dbStopwatch.elapsed(TimeUnit.MILLISECONDS), (double)aggStopwatch.elapsed(TimeUnit.MILLISECONDS));
+    responseTime.addNewRequest((double) dbStopwatch.elapsed(TimeUnit.MILLISECONDS), (double) aggStopwatch.elapsed(TimeUnit.MILLISECONDS));
 
     return result;
   }
 
+  @Transactional
   public ZwbHourlyAggregateCorpBean getHourlyStatsForCorpAndTimespan(Long corporationid, Long dateBegin, Long dateEnd)
   {
     long[] kills = new long[24];
@@ -157,12 +161,15 @@ public class ZwbAggregateCorpWorker
     final int days = daysCounted;
 
     IntStream.range(0, 24)
-      .forEach(i -> {avgonkills[i] = kills[i] == 0 ? 0.0 : (double) sumonkills[i] / (double) kills[i];
-                     avgkillsperday[i] = days == 0 ? 0.0 : (double) kills[i] / (double) days;});
+      .forEach(i -> {
+        avgonkills[i] = kills[i] == 0 ? 0.0 : (double) sumonkills[i] / (double) kills[i];
+        avgkillsperday[i] = days == 0 ? 0.0 : (double) kills[i] / (double) days;
+      });
 
     return new ZwbHourlyAggregateCorpBean(kills, sumonkills, avgkillsperday, avgonkills);
   }
 
+  @Transactional
   public Set<Long> getActivePlayerIdsForCorpAndTimespan(Long corporationid, Long dateBegin, Long dateEnd)
   {
     Set<Long> result = new HashSet<>();
@@ -175,6 +182,7 @@ public class ZwbAggregateCorpWorker
     return result;
   }
 
+  @Transactional
   public ZwbHistoryCorpBean getHistoryOfCorpInTimespan(Long corporationid, Long dateBegin, Long dateEnd)
   {
     List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporationid, dateBegin, dateEnd);
@@ -211,10 +219,13 @@ public class ZwbAggregateCorpWorker
         for(ZwbAggregateCorpJPA aggregate : aggregates)
         {
           long date = aggregate.getDate();
-          int month = (int)((date - (date / 10000L) * 10000L) / 100L);
+          int month = (int) ((date - (date / 10000L) * 10000L) / 100L);
           int index = (month - 1) * 2 + (date % 100L > 15 ? 1 : 0);
 
-          if(index > maxIndex) maxIndex = index;
+          if(index > maxIndex)
+          {
+            maxIndex = index;
+          }
 
           kills[index] += aggregate.getKills();
           losses[index] -= aggregate.getLosses();

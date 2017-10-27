@@ -39,7 +39,7 @@ public class DatabaseConfig
   public JpaVendorAdapter jpaVendorAdapter()
   {
     HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
-    hibernateJpaVendorAdapter.setShowSql(false);
+    hibernateJpaVendorAdapter.setShowSql(true);
     hibernateJpaVendorAdapter.setGenerateDdl(false);
     hibernateJpaVendorAdapter.setDatabase(Database.POSTGRESQL);
     return hibernateJpaVendorAdapter;

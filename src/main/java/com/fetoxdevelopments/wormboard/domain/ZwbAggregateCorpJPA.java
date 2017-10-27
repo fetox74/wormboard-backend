@@ -2,9 +2,12 @@ package com.fetoxdevelopments.wormboard.domain;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 
 import com.fetoxdevelopments.wormboard.domain.compositekeys.ZwbAggregateCorpId;
@@ -245,6 +248,36 @@ public class ZwbAggregateCorpJPA
   @Basic
   @Column(name = "\"sumonkillsinhour23\"")
   private long sumonkillsinhour23;
+
+  public ZwbAggregateCorpJPA()
+  {
+  }
+
+  public ZwbAggregateCorpJPA(long corporationid, String corporation, long kills, long losses, double iskwon, double isklost, String active, long numactive,
+                             long sumonkills)
+  {
+    this.corporationid = corporationid;
+    this.corporation = corporation;
+    this.kills = kills;
+    this.losses = losses;
+    this.iskwon = iskwon;
+    this.isklost = isklost;
+    this.active = active;
+    this.numactive = numactive;
+    this.sumonkills = sumonkills;
+  }
+
+  public ZwbAggregateCorpJPA(long corporationid, String corporation, long kills, long losses, double iskwon, double isklost, long numactive, long sumonkills)
+  {
+    this.corporationid = corporationid;
+    this.corporation = corporation;
+    this.kills = kills;
+    this.losses = losses;
+    this.iskwon = iskwon;
+    this.isklost = isklost;
+    this.numactive = numactive;
+    this.sumonkills = sumonkills;
+  }
 
   public long getDate()
   {

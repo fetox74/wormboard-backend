@@ -73,16 +73,4 @@ CREATE TABLE "zwbAggregateChar"
     CONSTRAINT "pk_zwbAggregateChar" PRIMARY KEY (date, characterid)
 )
 
-CREATE TABLE "zwbKnownCharacter"
-(
-    id integer NOT NULL,
-    name varchar(255) NOT NULL,
-    CONSTRAINT "pk_zwbKnownCharacter" PRIMARY KEY (id)
-)
-
-CREATE TABLE "zwbKnownCorporation"
-(
-    id integer NOT NULL,
-    name varchar(255) NOT NULL,
-    CONSTRAINT "pk_zwbKnownCorporation" PRIMARY KEY (id)
-)
+CREATE EXTENSION intarray;

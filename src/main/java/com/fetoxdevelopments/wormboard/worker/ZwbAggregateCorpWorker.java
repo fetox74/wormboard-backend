@@ -1,5 +1,6 @@
 package com.fetoxdevelopments.wormboard.worker;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
+import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpStub;
 import com.fetoxdevelopments.wormboard.bean.ZwbHistoryCorpBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbHourlyAggregateCorpBean;
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
@@ -53,60 +55,26 @@ public class ZwbAggregateCorpWorker
   {
     List<ZwbAggregateCorpBean> result = new ArrayList<>();
 
-    Map<Long, String> mapCorpName = new HashMap<>();
-    Map<Long, Long> mapCorpKills = new HashMap<>();
-    Map<Long, Long> mapCorpLosses = new HashMap<>();
-    Map<Long, Double> mapCorpIskwon = new HashMap<>();
-    Map<Long, Double> mapCorpIsklost = new HashMap<>();
-    Map<Long, Set<String>> mapCorpActive = new HashMap<>();
-    Map<Long, Long> mapCorpNumActive = new HashMap<>();
-    Map<Long, Long> mapCorpSumOnKills = new HashMap<>();
-
     Stopwatch dbStopwatch = Stopwatch.createStarted();
-    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findBetweenDates(dateBegin, dateEnd);
+    List<Object[]> aggregates = zwbAggregateCorpRepository.aggregateBetweenDates(dateBegin, dateEnd);
     dbStopwatch.stop();
     LOG.info("DB access in " + dbStopwatch.toString());
 
     Stopwatch aggStopwatch = Stopwatch.createStarted();
-    for(ZwbAggregateCorpJPA aggregate : aggregates)
-    {
-      Long corporationid = aggregate.getCorporationid();
-      if(mapCorpKills.containsKey(corporationid))
-      {
-        mapCorpKills.put(corporationid, mapCorpKills.get(corporationid) + aggregate.getKills());
-        mapCorpLosses.put(corporationid, mapCorpLosses.get(corporationid) + aggregate.getLosses());
-        mapCorpIskwon.put(corporationid, mapCorpIskwon.get(corporationid) + aggregate.getIskwon());
-        mapCorpIsklost.put(corporationid, mapCorpIsklost.get(corporationid) + aggregate.getIsklost());
-        Set<String> active = mapCorpActive.get(corporationid);
-        active.addAll(new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
-        mapCorpNumActive.put(corporationid, (long) active.size());
-        mapCorpSumOnKills.put(corporationid, mapCorpSumOnKills.get(corporationid) + aggregate.getSumonkills());
-      }
-      else
-      {
-        mapCorpName.put(corporationid, aggregate.getCorporation());
-        mapCorpKills.put(corporationid, aggregate.getKills());
-        mapCorpLosses.put(corporationid, aggregate.getLosses());
-        mapCorpIskwon.put(corporationid, aggregate.getIskwon());
-        mapCorpIsklost.put(corporationid, aggregate.getIsklost());
-        mapCorpActive.put(corporationid, new HashSet<>(Arrays.asList(aggregate.getActive().split(","))));
-        mapCorpNumActive.put(corporationid, aggregate.getNumactive());
-        mapCorpSumOnKills.put(corporationid, aggregate.getSumonkills());
-      }
-    }
 
-    for(Long corporationid : mapCorpKills.keySet())
+    for(Object[] aggregate : aggregates)
     {
-      String corporation = mapCorpName.get(corporationid);
-      long numactive = mapCorpNumActive.get(corporationid);
-      long kills = mapCorpKills.get(corporationid);
-      long losses = mapCorpLosses.get(corporationid);
-      double avgperkill = (double) mapCorpSumOnKills.get(corporationid) / kills;
+      long corporationid = ((Integer) aggregate[0]).longValue();
+      String corporation = (String) aggregate[1];
+      long numactive = aggregate[6] == null ? 0L : ((Integer) aggregate[6]).longValue();
+      long kills = ((BigInteger) aggregate[2]).longValue();
+      long losses = ((BigInteger) aggregate[3]).longValue();
+      double avgperkill = ((BigInteger) aggregate[7]).doubleValue() / kills;
 
       if(numactive > 0 && avgperkill > 0.0 && !corporation.equals("Vigilant Tyrannos"))
       {
-        double iskwon = mapCorpIskwon.get(corporationid);
-        double isklost = mapCorpIsklost.get(corporationid);
+        double iskwon = (Double) aggregate[4];
+        double isklost = (Double) aggregate[5];
         double netisk = iskwon - isklost;
         double kdratio = (double) kills / (double) losses;
         double kdefficiency = (1 - (double) losses / (double) (kills + losses)) * 100.0;

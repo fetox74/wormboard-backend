@@ -1,10 +1,13 @@
 package com.fetoxdevelopments.wormboard.controller;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fetoxdevelopments.wormboard.bean.ServerStatusBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCharBean;
@@ -43,22 +46,22 @@ public class StatisticAggregatesController
   public ServerStatusBean getServerStatus()
   {
     String statusMsg;
-    Set<String> allMonth = new LinkedHashSet<>();
     List<Long> allDates = zwbAggregateCorpWorker.getAllDates();
+    Set<String> allMonth = allDates.stream()
+      .map(Object::toString)
+      .map(dateAsString -> dateAsString.substring(0, 6))
+      .collect(Collectors.toCollection(LinkedHashSet::new));;
 
-    String latestProcessedDate = allDates.get(allDates.size() - 1).toString();
+    LocalDate firstProcessedDate = longToLocalDate(allDates.get(0));
+    LocalDate latestProcessedDate = longToLocalDate(allDates.get(allDates.size() - 1));
+    LocalDate today = LocalDate.now();
+    Long daysMissing = Stream.iterate(firstProcessedDate, date -> date.plusDays(1))
+      .limit(ChronoUnit.DAYS.between(firstProcessedDate, today) + 1)
+      .filter(date -> !allDates.contains(localDateToLong(date)))
+      .count();
 
-    for(Long date : allDates)
-    {
-      String dateAsString = date.toString();
-      allMonth.add(dateAsString.substring(0, 6));
-
-      // todo: find missing days
-    }
-
-    latestProcessedDate = Joiner.on("-").join(latestProcessedDate.substring(0, 4), latestProcessedDate.substring(4, 6), latestProcessedDate.substring(6, 8));
-    statusMsg = "data until " + latestProcessedDate + ", 0 days missing, ødb: " + String.format("%.2f", responseTime.getDbMillis()) +
-                " ms, øagg: " + String.format("%.2f", responseTime.getAggMillis()) + " ms";
+    statusMsg = "data until " + latestProcessedDate.toString() + ", " + daysMissing.toString() + (daysMissing == 1 ? " day" : " days") + " missing, ødb: " +
+                String.format("%.2f", responseTime.getDbMillis()) + " ms, øagg: " + String.format("%.2f", responseTime.getAggMillis()) + " ms";
 
     return new ServerStatusBean(new ArrayList<>(allMonth), statusMsg);
   }
@@ -189,5 +192,12 @@ public class StatisticAggregatesController
   private Long localDateToLong(LocalDate localDate)
   {
     return localDate.getYear() * 10000L + localDate.getMonth().getValue() * 100L + localDate.getDayOfMonth();
+  }
+
+  private LocalDate longToLocalDate(Long dateAsLong)
+  {
+    String longAsString = dateAsLong.toString();
+    String stringAsISODate = Joiner.on("-").join(longAsString.substring(0, 4), longAsString.substring(4, 6), longAsString.substring(6, 8));
+    return LocalDate.parse(stringAsISODate);
   }
 }

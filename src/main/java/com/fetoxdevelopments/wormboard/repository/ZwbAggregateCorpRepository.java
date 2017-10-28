@@ -3,7 +3,6 @@ package com.fetoxdevelopments.wormboard.repository;
 import java.util.List;
 import java.util.Set;
 
-import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpStub;
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
 import com.fetoxdevelopments.wormboard.domain.compositekeys.ZwbAggregateCorpId;
 import org.springframework.data.repository.CrudRepository;

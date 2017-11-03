@@ -48,9 +48,20 @@ public interface ZwbAggregateCorpRepository
                                                     @Param("dateBegin") Long dateBegin,
                                                     @Param("dateEnd") Long dateEnd);
 
+  @Query("SELECT zwbAggregateCorp"
+         + " FROM ZwbAggregateCorpJPA zwbAggregateCorp"
+         + " WHERE corporationid = :corporationid")
+  List<ZwbAggregateCorpJPA> findForCorp(@Param("corporationid") Long corporationid);
+
   @Query(value = "SELECT corporationid, corporation, sum(kills) AS kills, sum(losses) AS losses, sum(iskwon) AS iskwon, sum(isklost) AS isklost,"
                + " array_length(uniq(sort(string_to_array(string_agg(CASE WHEN \"active\" <> '' THEN \"active\" ELSE NULL END, ','), ',')\\:\\:integer[])), 1)"
                + " AS numactive, sum(sumonkills) AS sumonkills"
                + " FROM \"zwbAggregateCorp\" WHERE date >= ?1 AND date <= ?2 GROUP BY corporationid, corporation", nativeQuery = true)
   List<Object[]> aggregateBetweenDates(Long dateBegin, Long dateEnd);
+
+  @Query(value = "SELECT corporationid, corporation, sum(kills) AS kills, sum(losses) AS losses, sum(iskwon) AS iskwon, sum(isklost) AS isklost,"
+                 + " array_length(uniq(sort(string_to_array(string_agg(CASE WHEN \"active\" <> '' THEN \"active\" ELSE NULL END, ','), ',')\\:\\:integer[])), 1)"
+                 + " AS numactive, sum(sumonkills) AS sumonkills"
+                 + " FROM \"zwbAggregateCorp\" GROUP BY corporationid, corporation", nativeQuery = true)
+  List<Object[]> aggregateAll();
 }

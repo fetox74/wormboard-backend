@@ -50,7 +50,7 @@ public class StatisticAggregatesController
     Set<String> allMonth = allDates.stream()
       .map(Object::toString)
       .map(dateAsString -> dateAsString.substring(0, 6))
-      .collect(Collectors.toCollection(LinkedHashSet::new));;
+      .collect(Collectors.toCollection(LinkedHashSet::new));
 
     LocalDate firstProcessedDate = longToLocalDate(allDates.get(0));
     LocalDate latestProcessedDate = longToLocalDate(allDates.get(allDates.size() - 1));
@@ -88,6 +88,12 @@ public class StatisticAggregatesController
   public List<ZwbAggregateCorpBean> getStatsForYear(@RequestParam(value = "year", defaultValue = "") Long year)
   {
     return zwbAggregateCorpWorker.getStatsForTimespan(year * 10000, year * 10000 + 9999);
+  }
+
+  @RequestMapping("/getStatsForAllTime")
+  public List<ZwbAggregateCorpBean> getStatsAllTime()
+  {
+    return zwbAggregateCorpWorker.getStatsForTimespan(0L, 99999999L);
   }
 
   @RequestMapping("/getStatsForLast90Days")
@@ -178,6 +184,12 @@ public class StatisticAggregatesController
                                                         @RequestParam(value = "year", defaultValue = "") Long year)
   {
     return zwbAggregateCorpWorker.getHistoryOfCorpInTimespan(corporationid, year * 10000, year * 10000 + 9999);
+  }
+
+  @RequestMapping("/getCorpHistoryForAllTime")
+  public ZwbHistoryCorpBean getCorpHistoryForAllTime(@RequestParam(value = "corporationid") Long corporationid)
+  {
+    return zwbAggregateCorpWorker.getHistoryOfCorpInAllTime(corporationid);
   }
 
   @RequestMapping("/getCorpHistoryForLast90Days")

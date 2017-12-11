@@ -1,6 +1,8 @@
 package com.fetoxdevelopments.wormboard.worker;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
+import com.fetoxdevelopments.wormboard.bean.ZwbDayOfTheWeekBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbHistoryCorpBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbHourlyAggregateCorpBean;
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
@@ -175,6 +178,40 @@ public class ZwbAggregateCorpWorker
       });
 
     return new ZwbHourlyAggregateCorpBean(kills, sumonkills, avgkillsperday, avgonkills);
+  }
+
+  @Transactional
+  public ZwbDayOfTheWeekBean getWeekdayStatsForCorpAndTimespan(Long corporationid, Long dateBegin, Long dateEnd)
+  {
+    long[] kills = new long[7];
+    long[] sumonkills = new long[7];
+    double[] avgkillsperday = new double[7];
+    double[] avgonkills = new double[7];
+    int daysCounted = 0;
+
+    List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorpBetweenDates(corporationid, dateBegin, dateEnd);
+
+    for(ZwbAggregateCorpJPA aggregate : aggregates)
+    {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+      LocalDate localDate = LocalDate.parse(String.valueOf(aggregate.getDate()), formatter);
+      int dayOfWeek = localDate.getDayOfWeek().getValue() - 1;
+
+      kills[dayOfWeek] += aggregate.getKills();
+      sumonkills[dayOfWeek] += aggregate.getSumonkills();
+
+      daysCounted++;
+    }
+
+    final int days = daysCounted;
+
+    IntStream.range(0, 7)
+      .forEach(i -> {
+        avgonkills[i] = kills[i] == 0 ? 0.0 : (double) sumonkills[i] / (double) kills[i];
+        avgkillsperday[i] = days == 0 ? 0.0 : (double) kills[i] / (double) days;
+      });
+
+    return new ZwbDayOfTheWeekBean(kills, sumonkills, avgkillsperday, avgonkills, daysCounted);
   }
 
   @Transactional

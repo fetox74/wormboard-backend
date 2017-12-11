@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import com.fetoxdevelopments.wormboard.bean.ServerStatusBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCharBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbAggregateCorpBean;
+import com.fetoxdevelopments.wormboard.bean.ZwbDayOfTheWeekBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbHistoryCorpBean;
 import com.fetoxdevelopments.wormboard.bean.ZwbHourlyAggregateCorpBean;
 import com.fetoxdevelopments.wormboard.domain.ZwbAggregateCorpJPA;
@@ -133,6 +134,36 @@ public class StatisticAggregatesController
     Long yesterdayAsLong = localDateToLong(today.minusDays(1));
     Long ninetyDaysAgoAsLong = localDateToLong(today.minusDays(90));
     return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporationid, ninetyDaysAgoAsLong, yesterdayAsLong);
+  }
+
+  @RequestMapping("/getWeekdayCorpStatsForMonth")
+  public ZwbDayOfTheWeekBean getWeekdayCorpStatsForMonth(@RequestParam(value = "corporationid") Long corporationid,
+                                                         @RequestParam(value = "month", defaultValue = "") Long month)
+  {
+    return zwbAggregateCorpWorker.getWeekdayStatsForCorpAndTimespan(corporationid, month * 100, month * 100 + 99);
+  }
+
+  @RequestMapping("/getWeekdayCorpStatsForQuarter")
+  public ZwbDayOfTheWeekBean getWeekdayCorpStatsForQuarter(@RequestParam(value = "corporationid") Long corporationid,
+                                                           @RequestParam(value = "quarter", defaultValue = "") Long quarter)
+  {
+    return zwbAggregateCorpWorker.getWeekdayStatsForCorpAndTimespan(corporationid, quarter * 100, (quarter + 2) * 100 + 99);
+  }
+
+  @RequestMapping("/getWeekdayCorpStatsForYear")
+  public ZwbDayOfTheWeekBean getWeekdayCorpStatsForYear(@RequestParam(value = "corporationid") Long corporationid,
+                                                        @RequestParam(value = "year", defaultValue = "") Long year)
+  {
+    return zwbAggregateCorpWorker.getWeekdayStatsForCorpAndTimespan(corporationid, year * 10000, year * 10000 + 9999);
+  }
+
+  @RequestMapping("/getWeekdayCorpStatsForLast90Days")
+  public ZwbDayOfTheWeekBean getWeekdayCorpStatsForLast90Days(@RequestParam(value = "corporationid") Long corporationid)
+  {
+    LocalDate today = LocalDate.now();
+    Long yesterdayAsLong = localDateToLong(today.minusDays(1));
+    Long ninetyDaysAgoAsLong = localDateToLong(today.minusDays(90));
+    return zwbAggregateCorpWorker.getWeekdayStatsForCorpAndTimespan(corporationid, ninetyDaysAgoAsLong, yesterdayAsLong);
   }
 
   @RequestMapping("/getCorpActivePlayerStatsForMonth")

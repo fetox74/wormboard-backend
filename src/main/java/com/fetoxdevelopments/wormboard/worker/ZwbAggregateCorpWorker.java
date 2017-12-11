@@ -222,7 +222,7 @@ public class ZwbAggregateCorpWorker
 
     for(ZwbAggregateCorpJPA aggregate : aggregates)
     {
-      result.addAll(Arrays.stream(aggregate.getActive().split(",")).filter(e -> !e.isEmpty()).map(e -> Long.parseLong(e)).collect(Collectors.toSet()));
+      result.addAll(Arrays.stream(aggregate.getActive().split(",")).filter(e -> !e.isEmpty()).map(Long::parseLong).collect(Collectors.toSet()));
     }
     return result;
   }
@@ -244,7 +244,6 @@ public class ZwbAggregateCorpWorker
         double[] kdefficiency = new double[numElems];
         double[] iskwon = new double[numElems];
         double[] isklost = new double[numElems];
-        double[] netisk = new double[numElems];
         double[] iskefficiency = new double[numElems];
         double[] avgperkill = new double[numElems];
         double[] iskperactive = new double[numElems];
@@ -295,23 +294,10 @@ public class ZwbAggregateCorpWorker
         double[] iskperavgonkillTrunc = new double[maxIndex + 1];
         double[] netiskperavgonkillTrunc = new double[maxIndex + 1];
 
-        for(int i = 0; i <= maxIndex; i++)
-        {
-          killsTrunc[i] = kills[i];
-          lossesTrunc[i] = losses[i];
-          kdratioTrunc[i] = kdratio[i];
-          kdefficiencyTrunc[i] = kdefficiency[i];
-          iskwonTrunc[i] = iskwon[i];
-          isklostTrunc[i] = isklost[i];
-          netiskTrunc[i] = iskwon[i] + isklost[i];
-          iskefficiencyTrunc[i] = iskefficiency[i];
-          numactiveTrunc[i] = active[i].size();
-          avgperkillTrunc[i] = avgperkill[i];
-          iskperactiveTrunc[i] = iskperactive[i];
-          netiskperactiveTrunc[i] = netiskperactive[i];
-          iskperavgonkillTrunc[i] = iskperavgonkill[i];
-          netiskperavgonkillTrunc[i] = netiskperavgonkill[i];
-        }
+        truncateAggArrays(maxIndex, kills, losses, kdratio, kdefficiency, iskwon, isklost, iskefficiency, avgperkill, iskperactive, netiskperactive,
+                          iskperavgonkill, netiskperavgonkill, active, killsTrunc, lossesTrunc, kdratioTrunc, kdefficiencyTrunc, iskwonTrunc, isklostTrunc,
+                          netiskTrunc, iskefficiencyTrunc, numactiveTrunc, avgperkillTrunc, iskperactiveTrunc, netiskperactiveTrunc, iskperavgonkillTrunc,
+                          netiskperavgonkillTrunc);
 
         return new ZwbHistoryCorpBean(killsTrunc, lossesTrunc, kdratioTrunc, kdefficiencyTrunc, iskwonTrunc, isklostTrunc, netiskTrunc, iskefficiencyTrunc,
                                       numactiveTrunc, avgperkillTrunc, iskperactiveTrunc, netiskperactiveTrunc, iskperavgonkillTrunc, netiskperavgonkillTrunc);
@@ -340,7 +326,6 @@ public class ZwbAggregateCorpWorker
     double[] kdefficiency = new double[numElems];
     double[] iskwon = new double[numElems];
     double[] isklost = new double[numElems];
-    double[] netisk = new double[numElems];
     double[] iskefficiency = new double[numElems];
     double[] avgperkill = new double[numElems];
     double[] iskperactive = new double[numElems];
@@ -362,12 +347,9 @@ public class ZwbAggregateCorpWorker
       long date = aggregate.getDate();
       int year = (int) (date / 10000L);
       int month = (int) ((date - (date / 10000L) * 10000L) / 100L);
-      int index = (year - 2015) * 12 + month - 1;
+      int index = (year - 2012) * 6 + (month - 1) / 2;
 
-      if(index > maxIndex)
-      {
-        maxIndex = index;
-      }
+      maxIndex = index > maxIndex ? index : maxIndex;
 
       kills[index] += aggregate.getKills();
       losses[index] -= aggregate.getLosses();
@@ -392,6 +374,22 @@ public class ZwbAggregateCorpWorker
     double[] iskperavgonkillTrunc = new double[maxIndex + 1];
     double[] netiskperavgonkillTrunc = new double[maxIndex + 1];
 
+    truncateAggArrays(maxIndex, kills, losses, kdratio, kdefficiency, iskwon, isklost, iskefficiency, avgperkill, iskperactive, netiskperactive,
+                      iskperavgonkill, netiskperavgonkill, active, killsTrunc, lossesTrunc, kdratioTrunc, kdefficiencyTrunc, iskwonTrunc, isklostTrunc,
+                      netiskTrunc, iskefficiencyTrunc, numactiveTrunc, avgperkillTrunc, iskperactiveTrunc, netiskperactiveTrunc, iskperavgonkillTrunc,
+                      netiskperavgonkillTrunc);
+
+    return new ZwbHistoryCorpBean(killsTrunc, lossesTrunc, kdratioTrunc, kdefficiencyTrunc, iskwonTrunc, isklostTrunc, netiskTrunc, iskefficiencyTrunc,
+                                  numactiveTrunc, avgperkillTrunc, iskperactiveTrunc, netiskperactiveTrunc, iskperavgonkillTrunc, netiskperavgonkillTrunc);
+  }
+
+  private void truncateAggArrays(int maxIndex, long[] kills, long[] losses, double[] kdratio, double[] kdefficiency, double[] iskwon, double[] isklost,
+                                 double[] iskefficiency, double[] avgperkill, double[] iskperactive, double[] netiskperactive, double[] iskperavgonkill,
+                                 double[] netiskperavgonkill, Set<String>[] active, long[] killsTrunc, long[] lossesTrunc, double[] kdratioTrunc,
+                                 double[] kdefficiencyTrunc, double[] iskwonTrunc, double[] isklostTrunc, double[] netiskTrunc, double[] iskefficiencyTrunc,
+                                 long[] numactiveTrunc, double[] avgperkillTrunc, double[] iskperactiveTrunc, double[] netiskperactiveTrunc,
+                                 double[] iskperavgonkillTrunc, double[] netiskperavgonkillTrunc)
+  {
     for(int i = 0; i <= maxIndex; i++)
     {
       killsTrunc[i] = kills[i];
@@ -409,8 +407,5 @@ public class ZwbAggregateCorpWorker
       iskperavgonkillTrunc[i] = iskperavgonkill[i];
       netiskperavgonkillTrunc[i] = netiskperavgonkill[i];
     }
-
-    return new ZwbHistoryCorpBean(killsTrunc, lossesTrunc, kdratioTrunc, kdefficiencyTrunc, iskwonTrunc, isklostTrunc, netiskTrunc, iskefficiencyTrunc,
-                                  numactiveTrunc, avgperkillTrunc, iskperactiveTrunc, netiskperactiveTrunc, iskperavgonkillTrunc, netiskperavgonkillTrunc);
   }
 }

@@ -63,7 +63,7 @@ FORMAT = '%(asctime)-15s [%(levelname)-8s] %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO)
 LOG = logging.getLogger(__name__)
 
-PATH = 'C:\\Users\\odittrich\\Desktop\\access_logs\\'
+PATH = 'C:\\Users\\.fetox\\Desktop\\access_logs\\'
 RE_LOGLINE = '([(\d\.)]+) - - \[(.*?)\] "(.*?)" (\d+)'
 IPs = {}
 
@@ -101,10 +101,14 @@ for filename in os.listdir(PATH):
     else:
         continue
 
-# LOG.info("obtaining geo information..")
-# for ip in IPs:
-#     sleep(0.5)
-#     LOG.info("geoInfo: %s" % str(getIPGeoInformation(ip)))
+i = 0
+
+LOG.info("obtaining geo information..")
+for ip in IPs:
+    sleep(0.5)
+    LOG.info("geoInfo: %s" % str(getIPGeoInformation(ip)))
+
+i = 0
 
 
 

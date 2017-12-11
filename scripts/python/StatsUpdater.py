@@ -18,8 +18,9 @@ def partition(data, SIZE=100):
 
 def getKillmailHashes(date):
     request = urllib2.Request("https://zkillboard.com/api/history/" + date + "/")
-    request.add_header("Accept-encoding", "gzip")
+    request.add_header("Accept-Encoding", "gzip")
     request.add_header("Cache-Control", "1")
+    request.add_header("User-Agent", "http://fetox-developments.com/wormboard/ Maintainer: fetox74 EMail: odittrich@gmx.de")
     try:
         response = urllib2.urlopen(request)
     except urllib2.HTTPError as err:
@@ -35,9 +36,8 @@ def getKillmailHashes(date):
 
 
 def getCREST(tupleIdHash):
-    # print "%s: %s" % (tupleIdHash[0], tupleIdHash[1])
     request = urllib2.Request("https://crest-tq.eveonline.com/killmails/" + tupleIdHash[0] + "/" + tupleIdHash[1] + "/")
-    request.add_header("Accept-encoding", "gzip")
+    request.add_header("Accept-Encoding", "gzip")
     request.add_header("Cache-Control", "1")
     try:
         response = urllib2.urlopen(request)
@@ -53,37 +53,15 @@ def getCREST(tupleIdHash):
     return json.loads(data)
 
 
-# def getZKB(id):
-#     request = urllib2.Request("https://zkillboard.com/api/killID/" + id + "/")
-#     request.add_header("Accept-encoding", "gzip")
-#     request.add_header("Cache-Control", "1")
-#     try:
-#         response = urllib2.urlopen(request)
-#     except urllib2.HTTPError as err:
-#         print err
-#         return None
-#     if response.info().get("Content-Encoding") == "gzip":
-#         buf = StringIO(response.read())
-#         f = gzip.GzipFile(fileobj=buf)
-#         data = f.read()
-#     else:
-#         data = response.read()
-#
-#     result = json.loads(data)
-#     if len(result) > 0:
-#         return result[0]
-#     else:
-#         return None
-
-
 def getZKB(id, solarSystemId):
     if id in mapIdKillmail:
         return mapIdKillmail[id]
 
     for page in range(1, 11):
         request = urllib2.Request("https://zkillboard.com/api/no-items/no-attackers/solarSystemID/" + str(solarSystemId) + "/startTime/" + str(date) + "0000/endTime/" + str(date) + "2400/page/" + str(page) + "/")
-        request.add_header("Accept-encoding", "gzip")
+        request.add_header("Accept-Encoding", "gzip")
         request.add_header("Cache-Control", "1")
+        request.add_header("User-Agent", "http://fetox-developments.com/wormboard/ Maintainer: fetox74 EMail: odittrich@gmx.de")
         try:
             response = urllib2.urlopen(request)
         except urllib2.HTTPError as err:
@@ -299,9 +277,7 @@ def updateDB(cur, date):
     conn.commit()
 
 
-DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110"]
-#DATES = ["20170111", "20170112", "20170113", "20170114", "20170115", "20170116", "20170117", "20170118", "20170119", "20170120"]
-#DATES = ["20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131"]
+DATES = ["20130101", "20130102", "20130103", "20130104", "20130105", "20130106", "20130107", "20130108", "20130109", "20130110", "20130111", "20130112", "20130113", "20130114", "20130115", "20130116", "20130117", "20130118", "20130119", "20130120", "20130121", "20130122", "20130123", "20130124", "20130125", "20130126", "20130127", "20130128", "20130129", "20130130", "20130131"]
 reJMail = re.compile("J[0-9]{6}")
 
 try:

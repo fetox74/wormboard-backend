@@ -120,6 +120,12 @@ public class StatisticAggregatesController
     return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporationid, quarter * 100, (quarter + 2) * 100 + 99);
   }
 
+  @RequestMapping("/getHourlyCorpStatsForAllTime")
+  public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForAllTime(@RequestParam(value = "corporationid") Long corporationid)
+  {
+    return zwbAggregateCorpWorker.getHourlyStatsForCorpAndTimespan(corporationid, 0L, 99999999L);
+  }
+
   @RequestMapping("/getHourlyCorpStatsForYear")
   public ZwbHourlyAggregateCorpBean getHourlyCorpStatsForYear(@RequestParam(value = "corporationid") Long corporationid,
                                                               @RequestParam(value = "year", defaultValue = "") Long year)
@@ -157,6 +163,12 @@ public class StatisticAggregatesController
     return zwbAggregateCorpWorker.getWeekdayStatsForCorpAndTimespan(corporationid, year * 10000, year * 10000 + 9999);
   }
 
+  @RequestMapping("/getWeekdayCorpStatsForAllTime")
+  public ZwbDayOfTheWeekBean getWeekdayCorpStatsForAllTime(@RequestParam(value = "corporationid") Long corporationid)
+  {
+    return zwbAggregateCorpWorker.getWeekdayStatsForCorpAndTimespan(corporationid, 0L, 99999999L);
+  }
+
   @RequestMapping("/getWeekdayCorpStatsForLast90Days")
   public ZwbDayOfTheWeekBean getWeekdayCorpStatsForLast90Days(@RequestParam(value = "corporationid") Long corporationid)
   {
@@ -185,6 +197,12 @@ public class StatisticAggregatesController
                                                                     @RequestParam(value = "year", defaultValue = "") Long year)
   {
     return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporationid, year * 10000, year * 10000 + 9999);
+  }
+
+  @RequestMapping("/getCorpActivePlayerStatsForAllTime")
+  public List<ZwbAggregateCharBean> getCorpActivePlayerStatsForAllTime(@RequestParam(value = "corporationid") Long corporationid)
+  {
+    return zwbAggregateCharWorker.getStatsForActivePLayersOfCorpInTimespan(corporationid, 0L, 99999999L);
   }
 
   @RequestMapping("/getCorpActivePlayerStatsForLast90Days")

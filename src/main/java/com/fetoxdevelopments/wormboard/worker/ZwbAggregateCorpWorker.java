@@ -347,7 +347,7 @@ public class ZwbAggregateCorpWorker
       long date = aggregate.getDate();
       int year = (int) (date / 10000L);
       int month = (int) ((date - (date / 10000L) * 10000L) / 100L);
-      int index = (year - 2012) * 6 + (month - 1) / 2;
+      int index = (year - 2009) * 4 + (month - 1) / 3;
 
       maxIndex = index > maxIndex ? index : maxIndex;
 

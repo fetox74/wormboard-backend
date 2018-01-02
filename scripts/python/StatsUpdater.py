@@ -89,12 +89,9 @@ def getZKB(id, solarSystemId):
 
 def getFinalHitCorpAndUpdateAttackers(attackers, value):
     for attacker in attackers:
-        if "corporation" in attacker:
-            knownCorporationDict[attacker["corporation"]["id"]] = attacker["corporation"]["name"]
         if "character" in attacker:
             characterid = attacker["character"]["id"]
             character = attacker["character"]["name"]
-            knownCharacterDict[characterid] = character
             updateCharacter(characterid, character, 1, 0, value, 0.0)
     for attacker in attackers:
         if attacker["finalBlow"]:
@@ -131,7 +128,7 @@ def addNumberToHourDict(datetimestring, dict, number):
     dict[hour] = dict[hour] + number
 
 
-def getHourDict():
+def createHourDict():
     result = {}
     for i in range(24):
         result[str(i).zfill(2)] = 0
@@ -153,11 +150,9 @@ def updateDictionaries(killmailCREST, killmailZKB):
         finalHitCorpId, finalHitCorp = getFinalHitCorpAndUpdateAttackers(killmailCREST["attackers"], killmailZKB["totalValue"])
         victimCorpId = killmailCREST["victim"]["corporation"]["id"]
         victimCorp = killmailCREST["victim"]["corporation"]["name"]
-        knownCorporationDict[finalHitCorpId] = victimCorp
         if "character" in killmailCREST["victim"]:
             characterid = killmailCREST["victim"]["character"]["id"]
             character = killmailCREST["victim"]["character"]["name"]
-            knownCharacterDict[characterid] = character
             updateCharacter(characterid, character, 0, 1, 0.0, killmailZKB["totalValue"])
         if finalHitCorpId != -1:
             attackersOfFinalHitCorp = getAttackersOfCorp(killmailCREST["attackers"], finalHitCorpId)
@@ -168,14 +163,17 @@ def updateDictionaries(killmailCREST, killmailZKB):
                 masterDict[finalHitCorpId]["sumonkills"] = masterDict[finalHitCorpId]["sumonkills"] + len(attackersOfFinalHitCorp)
             else:
                 masterDict[finalHitCorpId] = {"corporation": finalHitCorp, "kills": 1, "iskwon": killmailZKB["totalValue"], "active": attackersOfFinalHitCorp,
-                                              "sumonkills": len(attackersOfFinalHitCorp), "killsinhour": getHourDict(), "sumonkillsinhour": getHourDict()}
+                                              "sumonkills": len(attackersOfFinalHitCorp), "killsinhour": createHourDict(), "sumonkillsinhour": createHourDict()}
             addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorpId]["killsinhour"], 1)
             addNumberToHourDict(killmailCREST["killTime"], masterDict[finalHitCorpId]["sumonkillsinhour"], len(attackersOfFinalHitCorp))
-        if victimCorpId in lossDict:
-            lossDict[victimCorpId]["losses"] = lossDict[victimCorpId]["losses"] + 1
-            lossDict[victimCorpId]["isklost"] = lossDict[victimCorpId]["isklost"] + killmailZKB["totalValue"]
-        else:
-            lossDict[victimCorpId] = {"losses": 1, "isklost": killmailZKB["totalValue"]}
+            if victimCorpId not in masterDict:
+                masterDict[victimCorpId] = {"corporation": victimCorp, "kills": 0, "iskwon": 0.0, "active": set(),
+                                            "sumonkills": 0, "killsinhour": createHourDict(), "sumonkillsinhour": createHourDict()}
+            if victimCorpId in lossDict:
+                lossDict[victimCorpId]["losses"] = lossDict[victimCorpId]["losses"] + 1
+                lossDict[victimCorpId]["isklost"] = lossDict[victimCorpId]["isklost"] + killmailZKB["totalValue"]
+            else:
+                lossDict[victimCorpId] = {"losses": 1, "isklost": killmailZKB["totalValue"]}
     else:
         print "kill id " + killmailCREST["killID_str"] + " seems not to exist on zKillboard.."
 
@@ -263,21 +261,24 @@ def updateDB(cur, date):
             value["sumonkillsinhour"]["22"],
             value["sumonkillsinhour"]["23"]))
 
-    for key, value in knownCharacterDict.items():
-        cur.execute('INSERT INTO "zwbKnownCharacter" ("id", "name") SELECT %i, %s WHERE NOT EXISTS (SELECT 1 FROM "zwbKnownCharacter" WHERE id = %i)' %
-                    (key, "'" + value.replace("'", "''") + "'", key))
-
-    for key, value in knownCorporationDict.items():
-        cur.execute('INSERT INTO "zwbKnownCorporation" ("id", "name") SELECT %i, %s WHERE NOT EXISTS (SELECT 1 FROM "zwbKnownCorporation" WHERE id = %i)' %
-                    (key, "'" + value.replace("'", "''") + "'", key))
-
     for key, value in characterDict.items():
         cur.execute('INSERT INTO "zwbAggregateChar" ("date", "characterid", "character", "kills", "losses", "iskwon", "isklost") VALUES (%i, %i, %s, %i, %i, %f, %f)' %
                     (int(date), key, "'" + value["character"].replace("'", "''") + "'", value["kills"], value["losses"], value["iskwon"], value["isklost"]))
     conn.commit()
 
 
-DATES = ["20130101", "20130102", "20130103", "20130104", "20130105", "20130106", "20130107", "20130108", "20130109", "20130110", "20130111", "20130112", "20130113", "20130114", "20130115", "20130116", "20130117", "20130118", "20130119", "20130120", "20130121", "20130122", "20130123", "20130124", "20130125", "20130126", "20130127", "20130128", "20130129", "20130130", "20130131"]
+DATES = ["20170101", "20170102", "20170103", "20170104", "20170105", "20170106", "20170107", "20170108", "20170109", "20170110", "20170111", "20170112", "20170113", "20170114", "20170115", "20170116", "20170117", "20170118", "20170119", "20170120", "20170121", "20170122", "20170123", "20170124", "20170125", "20170126", "20170127", "20170128", "20170129", "20170130", "20170131",
+         "20170201", "20170202", "20170203", "20170204", "20170205", "20170206", "20170207", "20170208", "20170209", "20170210", "20170211", "20170212", "20170213", "20170214", "20170215", "20170216", "20170217", "20170218", "20170219", "20170220", "20170221", "20170222", "20170223", "20170224", "20170225", "20170226", "20170227", "20170228",
+         "20170301", "20170302", "20170303", "20170304", "20170305", "20170306", "20170307", "20170308", "20170309", "20170310", "20170311", "20170312", "20170313", "20170314", "20170315", "20170316", "20170317", "20170318", "20170319", "20170320", "20170321", "20170322", "20170323", "20170324", "20170325", "20170326", "20170327", "20170328", "20170329", "20170330", "20170331",
+         "20170401", "20170402", "20170403", "20170404", "20170405", "20170406", "20170407", "20170408", "20170409", "20170410", "20170411", "20170412", "20170413", "20170414", "20170415", "20170416", "20170417", "20170418", "20170419", "20170420", "20170421", "20170422", "20170423", "20170424", "20170425", "20170426", "20170427", "20170428", "20170429", "20170430",
+         "20170501", "20170502", "20170503", "20170504", "20170505", "20170506", "20170507", "20170508", "20170509", "20170510", "20170511", "20170512", "20170513", "20170514", "20170515", "20170516", "20170517", "20170518", "20170519", "20170520", "20170521", "20170522", "20170523", "20170524", "20170525", "20170526", "20170527", "20170528", "20170529", "20170530", "20170531",
+         "20170601", "20170602", "20170603", "20170604", "20170605", "20170606", "20170607", "20170608", "20170609", "20170610", "20170611", "20170612", "20170613", "20170614", "20170615", "20170616", "20170617", "20170618", "20170619", "20170620", "20170621", "20170622", "20170623", "20170624", "20170625", "20170626", "20170627", "20170628", "20170629", "20170630",
+         "20170701", "20170702", "20170703", "20170704", "20170705", "20170706", "20170707", "20170708", "20170709", "20170710", "20170711", "20170712", "20170713", "20170714", "20170715", "20170716", "20170717", "20170718", "20170719", "20170720", "20170721", "20170722", "20170723", "20170724", "20170725", "20170726", "20170727", "20170728", "20170729", "20170730", "20170731",
+         "20170801", "20170802", "20170803", "20170804", "20170805", "20170806", "20170807", "20170808", "20170809", "20170810", "20170811", "20170812", "20170813", "20170814", "20170815", "20170816", "20170817", "20170818", "20170819", "20170820", "20170821", "20170822", "20170823", "20170824", "20170825", "20170826", "20170827", "20170828", "20170829", "20170830", "20170831",
+         "20170901", "20170902", "20170903", "20170904", "20170905", "20170906", "20170907", "20170908", "20170909", "20170910", "20170911", "20170912", "20170913", "20170914", "20170915", "20170916", "20170917", "20170918", "20170919", "20170920", "20170921", "20170922", "20170923", "20170924", "20170925", "20170926", "20170927", "20170928", "20170929", "20170930",
+         "20171001", "20171002", "20171003", "20171004", "20171005", "20171006", "20171007", "20171008", "20171009", "20171010", "20171011", "20171012", "20171013", "20171014", "20171015", "20171016", "20171017", "20171018", "20171019", "20171020", "20171021", "20171022", "20171023", "20171024", "20171025", "20171026", "20171027", "20171028", "20171029", "20171030", "20171031",
+         "20171101", "20171102", "20171103", "20171104", "20171105", "20171106", "20171107", "20171108", "20171109", "20171110", "20171111", "20171112", "20171113", "20171114", "20171115", "20171116", "20171117", "20171118", "20171119", "20171120", "20171121", "20171122", "20171123", "20171124", "20171125", "20171126", "20171127", "20171128", "20171129", "20171130",
+         "20171201", "20171202", "20171203", "20171204", "20171205", "20171206", "20171207", "20171208", "20171209", "20171210", "20171211", "20171212", "20171213", "20171214", "20171215", "20171216", "20171217", "20171218", "20171219", "20171220", "20171221", "20171222", "20171223", "20171224", "20171225", "20171226", "20171227", "20171228", "20171229", "20171230", "20171231"]
 reJMail = re.compile("J[0-9]{6}")
 
 try:
@@ -294,8 +295,6 @@ for date in DATES:
     masterDict = {}
     characterDict = {}
     lossDict = {}
-    knownCharacterDict = {}
-    knownCorporationDict = {}
     mapIdKillmail = {}
 
     print "processing " + date

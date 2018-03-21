@@ -84,6 +84,30 @@ def getZKB(id, solarSystemId):
     if id in mapIdKillmail:
         return mapIdKillmail[id]
     else:
+        return getSingleKillmailZKB(id)
+
+
+def getSingleKillmailZKB(id):
+    request = urllib2.Request("https://zkillboard.com/api/no-items/no-attackers/killID/" + str(id) + "/")
+    request.add_header("Accept-Encoding", "gzip")
+    request.add_header("Cache-Control", "1")
+    request.add_header("User-Agent", "http://fetox-developments.com/wormboard/ Maintainer: fetox74 EMail: odittrich@gmx.de")
+    try:
+        response = urllib2.urlopen(request)
+    except urllib2.HTTPError as err:
+        print err.headers
+        return None
+    if response.info().get("Content-Encoding") == "gzip":
+        buf = StringIO(response.read())
+        f = gzip.GzipFile(fileobj=buf)
+        data = f.read()
+    else:
+        data = response.read()
+
+    result = json.loads(data)
+    if len(result) > 0:
+        return result[0]["zkb"]
+    else:
         return None
 
 

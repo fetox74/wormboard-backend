@@ -57,6 +57,7 @@ def getZKB(id, solarSystemId):
     if id in mapIdKillmail:
         return mapIdKillmail[id]
 
+    # todo: this should actually only be done if the solar system has not been read for the current date already (add set of solarsystemid's, make sure to reset for next date)
     for page in range(1, 11):
         request = urllib2.Request("https://zkillboard.com/api/no-items/no-attackers/solarSystemID/" + str(solarSystemId) + "/startTime/" + str(date) + "0000/endTime/" + str(date) + "2400/page/" + str(page) + "/")
         request.add_header("Accept-Encoding", "gzip")

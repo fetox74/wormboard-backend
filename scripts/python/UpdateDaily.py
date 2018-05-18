@@ -10,6 +10,8 @@ from itertools import islice
 import psycopg2
 
 
+# THIS SCRIPT IS OUTDATED!!!
+
 # This script is meant to run as a daily cron job. It takes the current date and processes all zKillboard killmails of the day before, the day a week before and
 # the day a month before, after which it does an atomic update of the stats table (delete all todays killmail aggregates and rewrite them) for the given days,
 # hence regenerating every day at some point with a larger stride to catch late killmail submissions.

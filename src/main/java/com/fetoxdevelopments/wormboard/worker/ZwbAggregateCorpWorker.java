@@ -318,7 +318,7 @@ public class ZwbAggregateCorpWorker
   {
     List<ZwbAggregateCorpJPA> aggregates = zwbAggregateCorpRepository.findForCorp(corporationid);
 
-    int numElems = 36;
+    int numElems = 40;
 
     long[] kills = new long[numElems];
     long[] losses = new long[numElems];

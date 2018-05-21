@@ -3,11 +3,62 @@ import gzip
 import json
 import re
 import urllib2
+import psycopg2
+import time
+
 from StringIO import StringIO
 from multiprocessing.pool import ThreadPool
-
-import psycopg2
 from itertools import islice
+from functools import wraps
+
+
+# See LICENSE.md in /scripts/python folder
+def retry(ExceptionToCheck, tries=4, delay=3, backoff=2, logger=None):
+    """Retry calling the decorated function using an exponential backoff.
+
+    http://www.saltycrane.com/blog/2009/11/trying-out-retry-decorator-python/
+    original from: http://wiki.python.org/moin/PythonDecoratorLibrary#Retry
+
+    :param ExceptionToCheck: the exception to check. may be a tuple of
+        exceptions to check
+    :type ExceptionToCheck: Exception or tuple
+    :param tries: number of times to try (not retry) before giving up
+    :type tries: int
+    :param delay: initial delay between retries in seconds
+    :type delay: int
+    :param backoff: backoff multiplier e.g. value of 2 will double the delay
+        each retry
+    :type backoff: int
+    :param logger: logger to use. If None, print
+    :type logger: logging.Logger instance
+    """
+    def deco_retry(f):
+
+        @wraps(f)
+        def f_retry(*args, **kwargs):
+            mtries, mdelay = tries, delay
+            while mtries > 1:
+                try:
+                    return f(*args, **kwargs)
+                except ExceptionToCheck, e:
+                    msg = "%s, Retrying in %d seconds..." % (str(e), mdelay)
+                    if logger:
+                        logger.warning(msg)
+                    else:
+                        print msg
+                    time.sleep(mdelay)
+                    mtries -= 1
+                    mdelay *= backoff
+            return f(*args, **kwargs)
+
+        return f_retry  # true decorator
+
+    return deco_retry
+
+
+@retry(urllib2.URLError, tries=4, delay=3, backoff=2)
+def urlopen_with_retry(request):
+    return urllib2.urlopen(request)
 
 
 def partition(data, SIZE=100):
@@ -109,7 +160,7 @@ def getESI(tupleIdHash):
     request.add_header("Accept-Encoding", "gzip")
     request.add_header("Cache-Control", "1")
     try:
-        response = urllib2.urlopen(request)
+        response = urlopen_with_retry(request)
     except urllib2.HTTPError as err:
         print err
         return []
@@ -365,8 +416,8 @@ def updateDB(cur, date):
     conn.commit()
 
 
-#DATES = ["20180423", "20180430", "20180501", "20180502", "20180503", "20180504", "20180506"]
-DATES = ["20180101", "20180102", "20180103", "20180104", "20180105", "20180106", "20180107", "20180108", "20180109", "20180110", "20180111", "20180112", "20180113", "20180114", "20180115", "20180116", "20180117", "20180118", "20180119", "20180120", "20180121", "20180122", "20180123", "20180124", "20180125", "20180126", "20180127", "20180128", "20180129", "20180130", "20180131"]
+DATES = ["20180423", "20180430", "20180501", "20180502", "20180503", "20180504", "20180505", "20180506", "20180507", "20180508", "20180509", "20180510",
+         "20180511", "20180512", "20180513", "20180514", "20180515", "20180516", "20180517", "20180518", "20180519", "20180520"]
 reJMail = re.compile("J[0-9]{6}")
 
 try:

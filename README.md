@@ -6,7 +6,7 @@ The backend portion of the WormBoard project.
 
 Create a PostgreSQL database and run the CREATE.sql script from the scripts/sql folder in it. Then change the connect credentials in both,
 the StatsUpdater.py script in scripts/python and the one in DatabaseConfig.java in src/main/java/com/fetoxdevelopments/wormboard/config to
-your database.
+your database. Run CREATE EXTENSION intarray; to enable sort(int[]).
 
 ## Datagrinding
 

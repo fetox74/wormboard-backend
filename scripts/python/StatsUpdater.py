@@ -95,31 +95,33 @@ def getCorporationIdNameDict():
 
 
 def getCharacterNameESI(characterId):
-    request = urllib2.Request("https://esi.evetech.net/latest/characters/names/?character_ids=" + str(characterId) + "&datasource=tranquility")
+    request = urllib2.Request("https://esi.evetech.net/latest/universe/names/?datasource=tranquility")
     request.add_header("Accept-Encoding", "gzip")
     request.add_header("Cache-Control", "1")
-    response = urllib2.urlopen(request)
+    query = "[" + str(characterId) + "]"
+    response = urllib2.urlopen(url=request, data=query)
     if response.info().get("Content-Encoding") == "gzip":
         buf = StringIO(response.read())
         f = gzip.GzipFile(fileobj=buf)
         data = f.read()
     else:
         data = response.read()
-    return json.loads(data)[0]["character_name"]
+    return json.loads(data)[0]["name"]
 
 
 def getCorporationNameESI(corporationId):
-    request = urllib2.Request("https://esi.evetech.net/latest/corporations/names/?corporation_ids=" + str(corporationId) + "&datasource=tranquility")
+    request = urllib2.Request("https://esi.evetech.net/latest/universe/names/?datasource=tranquility")
     request.add_header("Accept-Encoding", "gzip")
     request.add_header("Cache-Control", "1")
-    response = urllib2.urlopen(request)
+    query = "[" + str(corporationId) + "]"
+    response = urllib2.urlopen(url=request, data=query)
     if response.info().get("Content-Encoding") == "gzip":
         buf = StringIO(response.read())
         f = gzip.GzipFile(fileobj=buf)
         data = f.read()
     else:
         data = response.read()
-    return json.loads(data)[0]["corporation_name"]
+    return json.loads(data)[0]["name"]
 
 
 def getCharacterNameForId(charId):
@@ -459,7 +461,7 @@ for date in DATES:
         pool.join()
 
         for killmailESI in results:
-            if killmailESI != [] and (reJMail.match(dictSolarSystemIdName[killmailESI["solar_system_id"]] or dictSolarSystemIdName[killmailESI["solar_system_id"]] == "J1226-0")):
+            if killmailESI != [] and killmailESI["solar_system_id"] in dictSolarSystemIdName and (reJMail.match(dictSolarSystemIdName[killmailESI["solar_system_id"]] or dictSolarSystemIdName[killmailESI["solar_system_id"]] == "J1226-0")):
                 updateDictionaries(killmailESI, getZKB(killmailESI["killmail_id"], killmailESI["solar_system_id"]))
                 jMailCounter += 1
             elif not killmailESI:  # 20160824 has the problematic first Keepstar kill that does not appear on CREST (ESI unchecked), this (and the above killmailESI != []) is a temporary fix..
